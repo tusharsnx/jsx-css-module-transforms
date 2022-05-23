@@ -1,7 +1,7 @@
 import * as t from "@babel/types"
 
 import { splitModuleName, splitModuleSource } from "./utils.js"
-import { Modules } from "../types/global"
+import type { Modules } from "./index"
 
 /**
  * creates a template literal by adding css-module classes as expression
