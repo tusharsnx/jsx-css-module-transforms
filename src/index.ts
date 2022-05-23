@@ -20,14 +20,17 @@ const API = function ({ types: t }: typeof babel): PluginObj<PluginPass> {
 
         if (!t.isImportDeclaration(path.node) || !/.module.(s[ac]ss)((#.*)?)$/iu.test(path.node.source.value)) return
 
+        // saving path for error messages
+        CSSModuleError.path = path
+
         if (path.node.specifiers.length > 1) {
             //eg. import style, {classA, classB} from "./m1.module.css"
-            throw new CSSModuleError(`more than one import found on ${chalk.green(path.node.source.value)}`, path)
+            throw new CSSModuleError(`more than one import found on ${chalk.cyan(path.node.source.value)}`)
         }
         if (path.node.specifiers.length == 1 && !t.isImportDefaultSpecifier(path.node.specifiers[0])) {
             // eg. import {classA, classB } from "./m1.module.css"
-            throw new Error(
-                `CSSModuleError: import css-module as a default import '${path.node.source.value}' at ${path.node.range}`
+            throw new CSSModuleError(
+                `import css-module as a default import for '${chalk.cyan(path.node.source.value)}'`
             )
         }
 
@@ -44,8 +47,7 @@ const API = function ({ types: t }: typeof babel): PluginObj<PluginPass> {
         } else if (moduleInfo.default) {
             if (modules.defaultModule) {
                 throw new CSSModuleError(
-                    `only one default css-module import is allowed. provide names for all except the default module`,
-                    path
+                    `only one default css-module import is allowed. provide names for all except the default module`
                 )
             }
 
@@ -74,6 +76,9 @@ const API = function ({ types: t }: typeof babel): PluginObj<PluginPass> {
 
     let JSXAttribute = (path: NodePath<t.JSXAttribute>, state: PluginPass) => {
         if (path.node.name.name != "className") return
+
+        // saving path for error messages
+        CSSModuleError.path = path
 
         // if no default modules is available, make the first modules as default
         if (!state.pluginState.modules.defaultModule) {

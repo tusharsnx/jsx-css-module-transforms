@@ -1,16 +1,19 @@
 import * as t from "@babel/types"
+import chalk from "chalk"
 
-import { splitModuleName, splitModuleSource } from "./utils.js"
+import { CSSModuleError, splitModuleName, splitModuleSource } from "./utils.js"
 import type { Modules } from "./index"
 
 /**
- * creates a template literal by adding css-module classes as expression
+ * generates template literal using css-module classes as expressions
  * and global classes as quasis
+ *
+ * @param cssModExpr array of string(representing global class) and memberExpression(representing css-module class)
  */
-const createTemplateLiteral = (cssModuleExpressions: (string | t.MemberExpression)[]) => {
+const createTemplateLiteral = (cssModExpr: (string | t.MemberExpression)[]) => {
     let templateLiteral: t.TemplateLiteral = t.templateLiteral([t.templateElement({ raw: "", cooked: "" })], []) // quasis must be 1 more than expression while creating templateLiteral
 
-    cssModuleExpressions.forEach((expression) => {
+    cssModExpr.forEach((expression) => {
         if (typeof expression === "string") {
             // overwrite the previous quasis element to include this classname
             templateLiteral.quasis[templateLiteral.quasis.length - 1].value.raw += expression + " "
@@ -34,8 +37,9 @@ const createTemplateLiteral = (cssModuleExpressions: (string | t.MemberExpressio
     return templateLiteral
 }
 /**
- * creates MemberExpression with module as the object and classname as the property.
- * eg. _module["classname"]
+ * creates MemberExpression using module as object and classname as property.
+ *
+ * eg. `<module-name>[<class-name>]`
  */
 export const createModuleMemberExpression = (
     classname: string,
@@ -49,7 +53,7 @@ export const createModuleMemberExpression = (
         moduleIdentifier = t.identifier(modules.defaultModule)
     } else {
         if (!(module in modules.namedModules))
-            throw new Error(`CSSModuleError: module '${module}' on class '${classname}' not found`)
+            throw new CSSModuleError(`module '${chalk.green(module)}' on class '${chalk.cyan(classname)}' not found`)
 
         moduleIdentifier = t.identifier(modules.namedModules[module])
     }
@@ -59,15 +63,14 @@ export const createModuleMemberExpression = (
 
 /**
  *
- * creates template literal out of classString that will be used to replace the original
- * classes in the classname attribute
+ * generates template literal from string classes
  *
- * @param classString: classes mentioned in the source
+ * @param classString string containing classes for the className attribute (eg. "classA classB")
+ * @returns templateLiteral based on string classes and modules
  */
 export const getTemplateFromStringClasses = (classString: string, modules: Modules): t.TemplateLiteral => {
-    // let { defaultModule, namedModules: moduleNames } = modules
     if (!modules.defaultModule) {
-        throw new Error("No default css-module found")
+        throw new CSSModuleError("No default css-module found")
     }
 
     let classList = classString.split(" ")
@@ -81,6 +84,11 @@ export const getTemplateFromStringClasses = (classString: string, modules: Modul
     return createTemplateLiteral(classAsModule)
 }
 
+/**
+ *
+ * @param statement import statement from the source
+ * @returns object representing type of import used and specifier present
+ */
 export const getImportInfo = (statement: t.ImportDeclaration): DefaultModule | ModuleWithSpecifier | NamedModule => {
     let module = splitModuleSource(statement.source.value)
     if (statement.specifiers.length) {

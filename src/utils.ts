@@ -39,14 +39,16 @@ export const splitModuleSource = (source: string): { moduleSource: string; modul
 }
 
 export class CSSModuleError extends Error {
-    fullMessage: string
-    message: string
-    constructor(message: string, path: NodePath) {
+    errorMessage: string
+    static path: NodePath
+
+    constructor(errorMessage: string) {
         super()
-        this.message = message
+        this.errorMessage = errorMessage
         this.name = chalk.red("CSSModuleError")
-        this.fullMessage = `at (${path.node.loc?.start.line}:${path.node.loc?.start.column})
-        ${this.message.replace(/^ +/, "")}
-        `.replace(/^ +/, "")
+        CSSModuleError.path
+        this.message = `at (${CSSModuleError.path.node.loc?.start.line}:${CSSModuleError.path.node.loc?.start.column})
+        ${this.errorMessage.replace(/ +/g, " ")}
+        `.replace(/ +/g, " ")
     }
 }
