@@ -1,0 +1,29 @@
+{
+    "name": "module-classname-transforms",
+    "version": "1.0.0",
+    "description": "A babel plugin to transform string classnames into css-module classnames",
+    "exports": "./dist/index.js",
+    "keywords": [
+        "module-classname-transforms"
+    ],
+    "author": "Tushar Singh",
+    "license": "ISC",
+    "type": "module",
+    "scripts": {
+        "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
+        "debug": "ts-node-dev --transpile-only --respawn --inspect=4321 --project tsconfig.dev.json",
+        "tsnd": "ts-node-dev --transpile-only --project tsconfig.dev.json"
+    },
+    "dependencies": {
+        "@babel/core": "^7.17.10",
+        "chalk": "^4.1.2"
+    },
+    "devDependencies": {
+        "@types/babel__core": "^7.1.19",
+        "@types/jest": "^27.5.0",
+        "jest": "^28.1.0",
+        "ts-jest": "^28.0.2",
+        "ts-node-dev": "^1.1.8",
+        "typescript": "^4.6.4"
+    }
+}
