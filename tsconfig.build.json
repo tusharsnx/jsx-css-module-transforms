@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    "module": "esnext",
+    "target": "es5",
+    "allowJs": true,
+    "incremental": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    // "declaration": false,
+    // "declarationDir": "./types",
+    "outDir": "./dist",
+    "sourceMap": true,
+  },
+  "ts-node": {
+    "transpileOnly": true,
+    "sourceMap": true,
+  },
+  "include": [
+    "src/*.ts",
+  ],
+  "exclude": [
+    "node_modules",
+    "tests"
+  ]
+}
