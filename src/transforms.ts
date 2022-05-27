@@ -68,7 +68,7 @@ export const createModuleMemberExpression = (
  * @param classString string containing classes for the className attribute (eg. "classA classB")
  * @returns templateLiteral based on string classes and modules
  */
-export const getTemplateFromStringClasses = (classString: string, modules: Modules): t.TemplateLiteral => {
+export const getTemplFromStrCls = (classString: string, modules: Modules): t.TemplateLiteral => {
     if (!modules.defaultModule) {
         throw new CSSModuleError("No default css-module found")
     }

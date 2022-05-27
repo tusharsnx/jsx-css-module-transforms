@@ -2,7 +2,7 @@ import type { NodePath, PluginObj, types as t } from "@babel/core"
 import type babel from "@babel/core"
 import chalk from "chalk"
 
-import { getImportInfo, getTemplateFromStringClasses } from "./transforms.js"
+import { getImportInfo, getTemplFromStrCls } from "./transforms.js"
 import { CSSModuleError } from "./utils.js"
 
 const API = function ({ types: t }: typeof babel): PluginObj<PluginPass> {
@@ -18,7 +18,7 @@ const API = function ({ types: t }: typeof babel): PluginObj<PluginPass> {
         // stores previous css-modules found on the same file
         let modules: Modules = state.pluginState.modules ?? { namedModules: {} }
 
-        if (!t.isImportDeclaration(path.node) || !/.module.(s[ac]ss)((#.*)?)$/iu.test(path.node.source.value)) return
+        if (!t.isImportDeclaration(path.node) || !/.module.(s[ac]ss|css)(#.*)?$/iu.test(path.node.source.value)) return
 
         // saving path for error messages
         CSSModuleError.path = path
@@ -90,7 +90,7 @@ const API = function ({ types: t }: typeof babel): PluginObj<PluginPass> {
 
         // string case
         if (t.isStringLiteral(path.node.value)) {
-            let templateLiteral = getTemplateFromStringClasses(path.node.value.value, fileCSSModules)
+            let templateLiteral = getTemplFromStrCls(path.node.value.value, fileCSSModules)
             let jsxExpressionContainer = t.jsxExpressionContainer(templateLiteral)
             let newJSXAttr = t.jsxAttribute(t.jsxIdentifier("className"), jsxExpressionContainer)
             path.replaceWith<t.JSXAttribute>(newJSXAttr)
