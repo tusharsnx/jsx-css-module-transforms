@@ -10,14 +10,9 @@
     "incremental": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
-    // "declaration": false,
-    // "declarationDir": "./types",
+    "declaration": true,
+    "declarationDir": "./types",
     "outDir": "./dist",
-    "sourceMap": true,
-  },
-  "ts-node": {
-    "transpileOnly": true,
-    "sourceMap": true,
   },
   "include": [
     "src/*.ts",

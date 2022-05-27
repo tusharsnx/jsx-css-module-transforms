@@ -10,8 +10,14 @@
         "moduleResolution": "node",
         "esModuleInterop": true,
         "sourceMap": true,
+        "outDir": "./dev"
+    },
+    "ts-node": {
+        "transpileOnly": true,
+        "sourceMap": true,
     },
     "include": [
+        "dev/*",
         "src/*.ts",
         "tests/*.ts"
     ],
