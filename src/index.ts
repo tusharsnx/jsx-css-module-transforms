@@ -23,15 +23,14 @@ const API = function ({ types: t }: typeof babel): PluginObj<PluginPass> {
         // saving path for error messages
         CSSModuleError.path = path
 
-        if (path.node.specifiers.length > 1) {
-            //eg. import style, {classA, classB} from "./m1.module.css"
-            throw new CSSModuleError(`more than one import found on ${chalk.cyan(path.node.source.value)}`)
-        }
-        if (path.node.specifiers.length == 1 && !t.isImportDefaultSpecifier(path.node.specifiers[0])) {
+        if (path.node.specifiers.length > 1 && !t.isImportDefaultSpecifier(path.node.specifiers[0])) {
             // eg. import {classA, classB } from "./m1.module.css"
-            throw new CSSModuleError(
-                `import css-module as a default import for '${chalk.cyan(path.node.source.value)}'`
-            )
+            throw new CSSModuleError(`import css-module as a default import on '${chalk.cyan(path.node.source.value)}'`)
+        }
+
+        if (path.node.specifiers.length > 1) {
+            // eg. import style, {classA, classB} from "./m1.module.css"
+            throw new CSSModuleError(`more than one import found on '${chalk.cyan(path.node.source.value)}'`)
         }
 
         let importSpecifier: t.Identifier,
@@ -60,6 +59,9 @@ const API = function ({ types: t }: typeof babel): PluginObj<PluginPass> {
             // saving new module
             state.pluginState.modules.defaultModule = importSpecifier.name
         } else {
+            if (moduleInfo.moduleName in state.pluginState.modules.namedModules) {
+                throw new CSSModuleError(`same module name found again`)
+            }
             importSpecifier = path.scope.generateUidIdentifier(moduleInfo.moduleName)
             newSpecifiers = [t.importDefaultSpecifier(importSpecifier)]
             newImportDeclaration = t.importDeclaration(newSpecifiers, t.stringLiteral(path.node.source.value))
@@ -111,7 +113,7 @@ export default API
 
 export type Modules = {
     defaultModule?: string
-    namedModules: { [filename: string]: string }
+    namedModules: { [moduleName: string]: string }
 }
 
 type PluginState = {
