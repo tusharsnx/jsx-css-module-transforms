@@ -1,7 +1,7 @@
 import * as t from "@babel/types"
 import chalk from "chalk"
 
-import { CSSModuleError, splitModuleName, splitModuleSource } from "./utils.js"
+import { CSSModuleError, splitClsName, splitModuleSource } from "./utils.js"
 import type { Modules } from "./index"
 
 /**
@@ -75,7 +75,7 @@ export const getTemplFromStrCls = (classString: string, modules: Modules): t.Tem
 
     let classList = classString.split(" ")
     let splittedClass = classList.map((classname) => {
-        return splitModuleName(classname, modules.defaultModule!) // typescript still complains even though we throw error when defaultModule is undefined
+        return splitClsName(classname, modules.defaultModule!) // typescript still complains even though we throw error when defaultModule is undefined
     })
     let classAsModule = splittedClass.map((classObj) => {
         if (classObj.module) return createModuleMemberExpression(classObj.classname, classObj.module, modules)

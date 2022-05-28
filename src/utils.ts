@@ -1,7 +1,14 @@
 import { NodePath } from "@babel/core"
 import chalk from "chalk"
 
-export const splitModuleName = (classname: string, defaultModule: string): { classname: string; module?: string } => {
+/**
+ * splits full classname (with '#') into classname and module name
+ *
+ * @param classname full classname with module
+ * @param defaultModule default module for the file
+ * @returns classname and module name used
+ */
+export const splitClsName = (classname: string, defaultModule: string): { classname: string; module?: string } => {
     if (shouldTransform(classname)) {
         // TODO: throw error if more than one '#' is present
         let [splittedClassName, module] = classname.split("#")
@@ -11,13 +18,10 @@ export const splitModuleName = (classname: string, defaultModule: string): { cla
         }
     } else {
         return {
+            // global class
             classname: classname.slice(0, classname.length - 1),
         }
     }
-}
-
-export const isJSXComponent = (jsxIdentifier: string) => {
-    return /^\p{Lu}/u.test(jsxIdentifier)
 }
 
 export const shouldTransform = (classname: string) => {
@@ -46,7 +50,6 @@ export class CSSModuleError extends Error {
         super()
         this.errorMessage = errorMessage
         this.name = chalk.red("CSSModuleError")
-        CSSModuleError.path
         this.message = `at (${CSSModuleError.path.node.loc?.start.line}:${CSSModuleError.path.node.loc?.start.column})
         ${this.errorMessage.replace(/ +/g, " ")}
         `.replace(/ +/g, " ")
