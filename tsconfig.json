@@ -17,7 +17,6 @@
         "sourceMap": true,
     },
     "include": [
-        "dev/*",
         "src/*.ts",
         "tests/*.ts"
     ],

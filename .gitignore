@@ -3,3 +3,4 @@
 **/demo-project/
 .vscode/
 **/package-lock.json
+**/coverage/

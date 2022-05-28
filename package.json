@@ -10,7 +10,8 @@
     "license": "ISC",
     "type": "module",
     "scripts": {
-        "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
+        "test": "NODE_OPTIONS=--experimental-vm-modules npx jest --verbose",
+        "test:cov": "NODE_OPTIONS=--experimental-vm-modules npx jest --verbose --coverage",
         "debug": "ts-node-dev --transpile-only --respawn --inspect=4321 --project tsconfig.dev.json",
         "tsnd": "ts-node-dev --transpile-only --project tsconfig.dev.json"
     },
