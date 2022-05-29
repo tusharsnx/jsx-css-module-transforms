@@ -28,6 +28,16 @@ describe("single imports", () => {
         expect(code).toMatchInlineSnapshot(`"import style from \\"./foo.module.css\\";"`)
     })
 
+    test("with specifier (ignore names)", async () => {
+        let source = `import style from "./foo.module.scss#m1"`
+        let code = await runWithBabel(source)
+        expect(code).toMatchInlineSnapshot(`"import style from \\"./foo.module.scss\\";"`)
+
+        source = `import style from "./foo.module.css#m1"`
+        code = await runWithBabel(source)
+        expect(code).toMatchInlineSnapshot(`"import style from \\"./foo.module.css\\";"`)
+    })
+
     test("with named-module", async () => {
         let source = `import "./foo.module.scss#m1"`
         let code = await runWithBabel(source)
