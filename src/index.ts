@@ -40,6 +40,11 @@ const API = function ({ types: t }: typeof babel): PluginObj<PluginPass> {
 
         if (moduleInfo.hasSpecifier) {
             importSpecifier = path.node.specifiers[0].local
+            if (importSpecifier.name in state.pluginState.modules.namedModules) {
+                throw new CSSModuleError(
+                    `CSS-Module ${chalk.yellow(`'${importSpecifier.name}'`)}  has already been declared`
+                )
+            }
 
             // saving new module
             state.pluginState.modules.namedModules[importSpecifier.name] = importSpecifier.name
@@ -60,7 +65,9 @@ const API = function ({ types: t }: typeof babel): PluginObj<PluginPass> {
             state.pluginState.modules.defaultModule = importSpecifier.name
         } else {
             if (moduleInfo.moduleName in state.pluginState.modules.namedModules) {
-                throw new CSSModuleError(`same module name found again`)
+                throw new CSSModuleError(
+                    `CSS-Module ${chalk.yellow(`'${moduleInfo.moduleName}'`)} has already been declared`
+                )
             }
             importSpecifier = path.scope.generateUidIdentifier(moduleInfo.moduleName)
             newSpecifiers = [t.importDefaultSpecifier(importSpecifier)]
