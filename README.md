@@ -31,7 +31,7 @@ function Component() {
     return <h1 className={`${_style.foo} ${_style.bar}`}> ..... </h1>
 }
 ```
-This sometimes can get too verbose and hurts **code readibility**. It would be nice if we could write our classes using normal strings and not having to deal with any style objects.
+This sometimes can get too verbose and hurts **code readibility**. It would be nice if we could write our classes as strings and not having to deal with any style objects.
 
 *remember, because of style objects we need to introduce template strings and object notations within our `className` attribute.*
 
@@ -56,7 +56,7 @@ function Component() {
 ```
 
 **By default, If plugin found any `'*.module.css'` import, it will transform all our css classes to use style objects.**
-If we want to use global css classes, we need to add `'#'` at the end of the class. This will tell plugin not to tranform these classes and keep them as is:
+If we want to use global css classes, we need to add `'#'` at the end of the class. This will tell plugin not to transform these classes and keep them as is:
 
 ```jsx
 import "./m1.module.css"
@@ -80,6 +80,7 @@ In this example, `'bar'` might be coming from our global stylesheet while `'foo'
 *The transformed code will use object indexing instead of dot-notation, this helps us to use dashes within our class names (eg. `className="foo-bar baz"`) or else, we would have to use camel-case pattern while using css classes.*
 
 ## Usage With Already Imported CSS-Module 
+
 If you were already been using css-module with style objects, the plugin will see it and transform other css-classes accordingly.
 for example:
 ```jsx
@@ -87,9 +88,9 @@ import style from "./component.module.css"
 
 function Component() {
     return (
-        <h1 className={style.foo}> 
-            <div className="bar baz"> .... </div>
-        </h1>
+        <div className={style.foo}> 
+            <h1 className="bar baz"> .... </h1>
+        </div>
     )
 }
 ```
@@ -100,9 +101,9 @@ import style from "./component.module.css"
 
 function Component() {
     return (
-        <h1 className={style.foo}> 
-            <div className={`${style["bar"]} ${style["baz"]}`}> .... </div>
-        </h1>
+        <div className={style.foo}> 
+            <h1 className={`${style["bar"]} ${style["baz"]}`}> .... </h1>
+        </div>
     )
 }
 ```
@@ -124,7 +125,11 @@ import "./layout.module.css#layout"
 import "./component.module.css#comp"
 
 function Component() {
-    return <h1 className="foo#layout bar#comp baz#layout"> ..... </h1>
+    return (
+        <div className="foo#layout bar#comp baz#layout"> 
+            <h1 className="grid-1#layout"> ... </h1>
+        </div>
+    )
 }
 
 // modified
@@ -134,9 +139,9 @@ import _comp from "./component.module.css"
 
 function Component() {
     return (
-        <h1 className={`${_layout["foo"]} ${_comp["bar"]} ${_layout["baz"]}`}> 
-            <div className={`${_layout["grid-1"]}`}></div>
-        </h1>
+        <div className={`${_layout["foo"]} ${_comp["bar"]} ${_layout["baz"]}`}> 
+            <h1 className={`${_layout["grid-1"]}`}></h1>
+        </div>
     )
 }
 ```
