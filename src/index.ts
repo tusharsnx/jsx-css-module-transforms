@@ -77,14 +77,17 @@ const API = function ({ types: t }: typeof babel): PluginObj<PluginPass> {
     }
 
     let JSXAttribute = (path: NodePath<t.JSXAttribute>, state: PluginPass) => {
-        if (path.node.name.name != "className") return
+        let firstNamedModule = getFirstNamedModule(state.pluginState.modules.namedModules)
+
+        if (path.node.name.name != "className" || (!state.pluginState.modules.defaultModule && !firstNamedModule)) {
+            return
+        }
 
         // saving path for error messages
         CSSModuleError.path = path
 
         // if no default modules is available, make the first modules as default
-        if (!state.pluginState.modules.defaultModule) {
-            let firstNamedModule = Object.keys(state.pluginState.modules.namedModules)[0]
+        if (!state.pluginState.modules.defaultModule && firstNamedModule) {
             state.pluginState.modules.defaultModule = state.pluginState.modules.namedModules[firstNamedModule]
         }
 
@@ -110,6 +113,11 @@ const API = function ({ types: t }: typeof babel): PluginObj<PluginPass> {
 }
 
 export default API
+
+function getFirstNamedModule(namedModules: Modules["namedModules"]): string | null {
+    for (let module in namedModules) return module
+    return null
+}
 
 export type Modules = {
     defaultModule?: string
