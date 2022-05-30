@@ -4,13 +4,53 @@
 
 This is a babel plugin to transform all your string classes into css-module classes automatically. 
 
-Its lets you write css-module classes just like normal classes(no need to use style objects). Its faster to write and improves code readability.
+Its lets you write css-module classes just like normal classes (without using style objects). Its faster to write and improves code readability.
 You can import multiple css-modules with different names and then use it as [named-module](#introducing-named-css-modules). supports \*sass/scss modules also. 
 
-*\* you may need to use sass-loader with webpack*
+*\*you may need to use sass-loader with webpack*
+
+# Installation
+
+Install the plugin using npm:
+```sh
+npm install --save-dev jsx-css-module-transforms 
+```
+
+after installing, If you are using babel, add this to your plugins:
+```json
+// .babelrc
+
+{
+   "plugins": [
+       "module:jsx-css-module-transforms", 
+    ]
+}
+```
+
+Or, for Webpack, modify the babel-loader options to include the plugin:
+
+```js
+// webpack.config.js
+
+module.exports = {
+  module: {
+    rules: [
+      {
+        loader: "babel-loader",
+        options: {
+          plugins: [ "module:jsx-css-module-transforms", ... ],
+       },
+      },
+    ],
+  },
+}
+```
+Note: *The plugin expects source code with **JSX**, plugins that executes before might transform JSX even before it reaches to the plugin.
+If plugin isn't working or throwing unexpected errors, try keeping it at the begining of the list.*
+
 # Usage
 
-We can import the css-module like as normal css import without any import variable.
+We can import the css-module like normal css import without any import variable.
 
 ```jsx
 import "./m1.module.css"
