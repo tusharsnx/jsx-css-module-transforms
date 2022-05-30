@@ -1,7 +1,7 @@
 import * as t from "@babel/types"
 import chalk from "chalk"
 
-import { CSSModuleError, splitClsName, splitModuleSource } from "./utils.js"
+import { CSSModuleError, splitClsName, splitModuleSource } from "./utils"
 import type { Modules } from "./index"
 
 /**

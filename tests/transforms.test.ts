@@ -1,4 +1,4 @@
-import babel from "@babel/core"
+import * as babel from "@babel/core"
 import API from "../src/index"
 import { CSSModuleError } from "../src/utils"
 

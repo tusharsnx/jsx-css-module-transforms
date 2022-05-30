@@ -2,8 +2,8 @@ import type { NodePath, PluginObj, types as t } from "@babel/core"
 import type babel from "@babel/core"
 import chalk from "chalk"
 
-import { getImportInfo, getTemplFromStrCls } from "./transforms.js"
-import { CSSModuleError } from "./utils.js"
+import { getImportInfo, getTemplFromStrCls } from "./transforms"
+import { CSSModuleError } from "./utils"
 
 const API = function ({ types: t }: typeof babel): PluginObj<PluginPass> {
     function pre(this: PluginPass): void {
