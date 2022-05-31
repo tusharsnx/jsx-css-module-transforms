@@ -1,29 +1,33 @@
 import * as t from "@babel/types"
 
-import { splitClsName, shouldTransform } from "../src/utils"
+import { splitClsName, shouldTransform, CSSModuleError } from "../src/utils"
 import { createModuleMemberExpression } from "../src/transforms"
 
 // testing splitModuleName
 describe("split string into module and classnames", () => {
     test("class without modifier", () => {
-        let { classname, module } = splitClsName("classB#m1", "m1")
+        let { classname, module } = splitClsName("classB:m1", "m1")
 
         expect(classname).toBe("classB")
         expect(module).toBe("m1")
     })
 
     test("class with modifier", () => {
-        let { classname, module } = splitClsName("classB-modifier#m2", "m1")
+        let { classname, module } = splitClsName("classB-modifier:m2", "m1")
 
         expect(classname).toBe("classB-modifier")
         expect(module).toBe("m2")
     })
 
-    test("using global module", () => {
-        let { classname, module } = splitClsName("classA#", "m1")
+    test("global module", () => {
+        let { classname, module } = splitClsName("classA:g", "m1")
 
         expect(classname).toBe("classA")
         expect(module).toBeUndefined()
+    })
+
+    test("classname with separator only", () => {
+        expect(() => splitClsName("classA:", "m1")).toThrow(CSSModuleError)
     })
 
     test("use default module", () => {
@@ -36,13 +40,18 @@ describe("split string into module and classnames", () => {
 
 // testing checkShouldTransform
 describe("transform are applied correctly", () => {
-    test("transform needed", () => {
+    test("should transform", () => {
         let transform = shouldTransform("foo-bar")
         expect(transform).toBe(true)
     })
 
-    test("transform not needed", () => {
-        let transform = shouldTransform("foo-bar#")
+    test("should transform (only sep)", () => {
+        let transform = shouldTransform("foo-bar:")
+        expect(transform).toBe(true)
+    })
+
+    test("should not transform", () => {
+        let transform = shouldTransform("foo-bar:g")
         expect(transform).toBe(false)
     })
 })
