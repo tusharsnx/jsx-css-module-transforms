@@ -17,7 +17,7 @@ npm install --save-dev jsx-css-module-transforms
 ```
 
 after installing, If you are using babel, add this to your plugins:
-```json
+```jsonc
 // .babelrc
 
 {
