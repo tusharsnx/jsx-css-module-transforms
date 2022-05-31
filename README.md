@@ -47,7 +47,7 @@ module.exports = {
 ```
 
 > Note: *The plugin expects source code with **JSX**, plugins that executes before might transform JSX even before it reaches to the plugin.
-> If plugin isn't working or throwing unexpected errors, try keeping it at the begining of the list.*
+> If plugin isn't working or throwing unexpected errors, try keeping it at the beginning of the list.*
 
 # Usage
 
@@ -117,7 +117,7 @@ function Component() {
 }
 ```
 
-In this example, `'bar'` might be coming from our global stylesheet while `'foo'` and `'bar'` are scoped to the imported module.
+In this example, `'bar'` might be coming from our global stylesheet while `'foo'` and `'baz'` are scoped to the imported module.
 
 *The transformed code will use object indexing instead of dot-notation, this helps us to use dashes within our class names (eg. `className="foo-bar baz"`) or else, we would have to use camel-case pattern while using css classes.*
 
