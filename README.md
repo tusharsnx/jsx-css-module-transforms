@@ -45,8 +45,9 @@ module.exports = {
   },
 }
 ```
-Note: *The plugin expects source code with **JSX**, plugins that executes before might transform JSX even before it reaches to the plugin.
-If plugin isn't working or throwing unexpected errors, try keeping it at the begining of the list.*
+
+> Note: *The plugin expects source code with **JSX**, plugins that executes before might transform JSX even before it reaches to the plugin.
+> If plugin isn't working or throwing unexpected errors, try keeping it at the begining of the list.*
 
 # Usage
 
@@ -96,6 +97,7 @@ function Component() {
 ```
 
 **By default, If plugin found any `'*.module.css'` import, it will transform all our css classes to use style objects.**
+
 If we want to use global css classes, we need to add `'#'` at the end of the class. This will tell plugin not to transform these classes and keep them as is:
 
 ```jsx
