@@ -98,13 +98,13 @@ function Component() {
 
 **By default, If plugin found any `'*.module.css'` import, it will transform all our css classes to use style objects.**
 
-If we want to use global css classes, we need to add `'#'` at the end of the class. This will tell plugin not to transform these classes and keep them as is:
+If we want to use global css classes, we need to add `':g'` at the end of the class. This will tell plugin not to transform these classes and keep them as is:
 
 ```jsx
 import "./m1.module.css"
 
 function Component() {
-    return <h1 className="foo bar# baz"> .... </h1>
+    return <h1 className="foo bar:g baz"> .... </h1>
 }
 ```
 
@@ -117,7 +117,7 @@ function Component() {
 }
 ```
 
-In this example, `'bar'` might be coming from our global stylesheet while `'foo'` and `'baz'` are scoped to the imported module.
+In this example, `'bar'` might be declared in the global stylesheet while `'foo'` and `'baz'` are scoped to the imported module.
 
 *The transformed code will use object indexing instead of dot-notation, this helps us to use dashes within our class names (eg. `className="foo-bar baz"`) or else, we would have to use camel-case pattern while using css classes.*
 
@@ -163,13 +163,13 @@ eg. we can import two module and use them like:
 ```jsx
 // original 
 
-import "./layout.module.css#layout"
-import "./component.module.css#comp"
+import "./layout.module.css:layout"
+import "./component.module.css:comp"
 
 function Component() {
     return (
-        <div className="foo#layout bar#comp baz#layout"> 
-            <h1 className="grid-1#layout"> ... </h1>
+        <div className="foo:layout bar:comp baz:layout"> 
+            <h1 className="grid-1:layout"> ... </h1>
         </div>
     )
 }
