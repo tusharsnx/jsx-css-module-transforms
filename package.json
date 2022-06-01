@@ -12,8 +12,7 @@
         "build": "tsc -p tsconfig.build.json",
         "test": "jest --verbose",
         "test:cov": "jest --verbose --coverage",
-        "debug": "ts-node-dev --transpile-only --respawn --inspect=4321 --project tsconfig.dev.json",
-        "tsnd": "ts-node-dev --transpile-only --project tsconfig.dev.json"
+        "dev": "tsc -p tsconfig.json"
     },
     "dependencies": {
         "@babel/core": "^7.17.10",
