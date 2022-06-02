@@ -110,7 +110,7 @@ export const getImportInfo = (statement: t.ImportDeclaration): DefaultModule | M
         }
     }
 
-    // eg. import "./moduleA.module.css#m1"
+    // eg. import "./moduleA.module.css:m1"
     return {
         moduleSource: module.moduleSource,
         moduleName: module.moduleName,

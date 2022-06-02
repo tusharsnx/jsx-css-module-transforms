@@ -18,7 +18,7 @@ const API = function ({ types: t }: typeof babel): PluginObj<PluginPass> {
         // stores previous css-modules found on the same file
         let modules: Modules = state.pluginState.modules ?? { namedModules: {} }
 
-        if (!t.isImportDeclaration(path.node) || !/.module.(s[ac]ss|css)(#.*)?$/iu.test(path.node.source.value)) return
+        if (!t.isImportDeclaration(path.node) || !/.module.(s[ac]ss|css)(:.*)?$/iu.test(path.node.source.value)) return
 
         // saving path for error messages
         CSSModuleError.path = path
