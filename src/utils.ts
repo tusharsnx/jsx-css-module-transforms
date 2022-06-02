@@ -2,7 +2,7 @@ import { NodePath } from "@babel/core"
 import chalk from "chalk"
 
 /**
- * splits full classname (with '#') into classname and module name
+ * splits full classname (with ':') into classname and module name
  *
  * @param classname full classname with module
  * @param defaultModule default module for the file
