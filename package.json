@@ -8,6 +8,7 @@
     ],
     "author": "Tushar Singh",
     "license": "MIT",
+    "repository": "github:tusharsnn/jsx-css-module-transforms",
     "scripts": {
         "build": "tsc -p tsconfig.build.json",
         "test": "jest --verbose",
