@@ -1,6 +1,6 @@
 {
     "name": "jsx-css-module-transforms",
-    "version": "0.2.1-beta",
+    "version": "0.2.2-beta",
     "description": "A babel plugin to transform string classnames into css-module classnames",
     "exports": "./dist/index.js",
     "keywords": [
