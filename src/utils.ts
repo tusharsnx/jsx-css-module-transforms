@@ -8,7 +8,7 @@ import chalk from "chalk";
  * @param defaultModule default module for the file
  * @returns classname and module name used
  */
-export const splitClsName = (classname: string, defaultModule: string): { classname: string; module?: string } => {
+export function splitClsName(classname: string, defaultModule: string): { classname: string; module?: string } {
     if (shouldTransform(classname)) {
         // TODO: throw error if more than one sep is present, or use last sep in the classname to split
         let [splittedClassName, module] = classname.split(":");
@@ -26,15 +26,15 @@ export const splitClsName = (classname: string, defaultModule: string): { classn
             classname: classname.slice(0, classname.length - 2),
         };
     }
-};
+}
 
-export const shouldTransform = (classname: string) => {
+export function shouldTransform(classname: string) {
     return !classname.endsWith(":g");
-};
+}
 
-export const splitClassnames = (classes: string) => {
+export function splitClassnames(classes: string) {
     return classes.split(" ");
-};
+}
 
 /**
  * Splits module source into module source and user-provided module name
@@ -42,7 +42,7 @@ export const splitClassnames = (classes: string) => {
  * @param source - module spec that contains a module source path and a user provided module name eg. `"moduleA.module.css:m1"`
  * @returns object with module source and user provided module name
  */
-export const splitModuleSource = (source: string): { moduleSource: string; moduleName?: string } => {
+export function splitModuleSource(source: string): { moduleSource: string; moduleName?: string } {
     if (!source.includes(":")) {
         return {
             moduleSource: source,
@@ -50,7 +50,7 @@ export const splitModuleSource = (source: string): { moduleSource: string; modul
     }
     let [moduleSource, moduleName] = source.split(":");
     return { moduleSource, moduleName };
-};
+}
 
 export class CSSModuleError extends Error {
     errorMessage: string;

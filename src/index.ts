@@ -6,7 +6,7 @@ import chalk from "chalk";
 import { getImportInfo, getTemplFromStrCls } from "./transforms";
 import { CSSModuleError } from "./utils";
 
-let ImportDeclaration = (path: NodePath<t.ImportDeclaration>, state: PluginPass) => {
+function ImportDeclaration(path: NodePath<t.ImportDeclaration>, state: PluginPass) {
     // we're only interested in scss/sass/css imports
     if (!/.module.(s[ac]ss|css)(:.*)?$/iu.test(path.node.source.value)) {
         return;
@@ -61,9 +61,9 @@ let ImportDeclaration = (path: NodePath<t.ImportDeclaration>, state: PluginPass)
 
     // strips away module name from the source
     path.node.source.value = moduleInfo.moduleSource; // this inplace replacment does not causes any problem with the ast
-};
+}
 
-let JSXAttribute = (path: NodePath<t.JSXAttribute>, state: PluginPass) => {
+function JSXAttribute(path: NodePath<t.JSXAttribute>, state: PluginPass) {
     // we only support className attribute having a string value
     if (path.node.name.name != "className" || !t.isStringLiteral(path.node.value)) {
         return;
@@ -90,9 +90,9 @@ let JSXAttribute = (path: NodePath<t.JSXAttribute>, state: PluginPass) => {
     let newJSXAttr = t.jsxAttribute(t.jsxIdentifier("className"), jsxExpressionContainer);
     path.replaceWith(newJSXAttr);
     path.skip();
-};
+}
 
-const API = function ({ types: t }: typeof babel): PluginObj<PluginPass> {
+function API({ types: t }: typeof babel): PluginObj<PluginPass> {
     /**
      *  Sets up the initial state of the plugin
      */
@@ -111,7 +111,7 @@ const API = function ({ types: t }: typeof babel): PluginObj<PluginPass> {
             JSXAttribute,
         },
     };
-};
+}
 
 export default API;
 

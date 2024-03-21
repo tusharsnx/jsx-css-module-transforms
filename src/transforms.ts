@@ -10,7 +10,7 @@ import type { Modules } from "./index";
  *
  * @param cssModExpr array of string(representing global class) and memberExpression(representing css-module class)
  */
-const createTemplateLiteral = (cssModExpr: (string | t.MemberExpression)[]) => {
+function createTemplateLiteral(cssModExpr: (string | t.MemberExpression)[]) {
     let templateLiteral: t.TemplateLiteral = t.templateLiteral([t.templateElement({ raw: "", cooked: "" })], []); // quasis must be 1 more than expression while creating templateLiteral
 
     cssModExpr.forEach((expression) => {
@@ -33,13 +33,13 @@ const createTemplateLiteral = (cssModExpr: (string | t.MemberExpression)[]) => {
     templateLiteral.quasis[templateLiteral.quasis.length - 1].tail = true;
 
     return templateLiteral;
-};
+}
 /**
  * creates MemberExpression using module as object and classname as property.
  *
  * eg. `<module-name>[<class-name>]`
  */
-export const createModuleMemberExpression = (classname: string, module: string, modules: Modules): t.MemberExpression => {
+export function createModuleMemberExpression(classname: string, module: string, modules: Modules): t.MemberExpression {
     let moduleIdentifier: t.Identifier;
     let classnameStringLiteral = t.stringLiteral(classname);
 
@@ -54,7 +54,7 @@ export const createModuleMemberExpression = (classname: string, module: string, 
     }
 
     return t.memberExpression(moduleIdentifier, classnameStringLiteral, true);
-};
+}
 
 /**
  *
@@ -63,7 +63,7 @@ export const createModuleMemberExpression = (classname: string, module: string, 
  * @param classString string containing classes for the className attribute (eg. "classA classB")
  * @returns templateLiteral based on string classes and modules
  */
-export const getTemplFromStrCls = (classString: string, modules: Modules): t.TemplateLiteral => {
+export function getTemplFromStrCls(classString: string, modules: Modules): t.TemplateLiteral {
     if (!modules.defaultModule) {
         throw new CSSModuleError("No default css-module found");
     }
@@ -80,14 +80,14 @@ export const getTemplFromStrCls = (classString: string, modules: Modules): t.Tem
         }
     });
     return createTemplateLiteral(classAsModule);
-};
+}
 
 /**
  * A helper function to identify Kind of import source.
  * @param statement import statement from the source
  * @returns object representing type of import used and specifier present
  */
-export const getImportInfo = (statement: t.ImportDeclaration): DefaultModule | ModuleWithSpecifier | NamedModule => {
+export function getImportInfo(statement: t.ImportDeclaration): DefaultModule | ModuleWithSpecifier | NamedModule {
     let module = splitModuleSource(statement.source.value);
 
     // .length is either 0 or 1.
@@ -117,7 +117,7 @@ export const getImportInfo = (statement: t.ImportDeclaration): DefaultModule | M
             hasSpecifier: false,
         };
     }
-};
+}
 
 type DefaultModule = {
     moduleSource: string;
