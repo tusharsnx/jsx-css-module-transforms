@@ -27,10 +27,8 @@ const createTemplateLiteral = (cssModExpr: (string | t.MemberExpression)[]) => {
     })
 
     // removing extra spaces, this way we don't have to figure out the last quasis added was a class or a space
-    templateLiteral.quasis[templateLiteral.quasis.length - 1].value.raw =
-        templateLiteral.quasis[templateLiteral.quasis.length - 1].value.raw.trimEnd()
-    templateLiteral.quasis[templateLiteral.quasis.length - 1].value.cooked =
-        templateLiteral.quasis[templateLiteral.quasis.length - 1].value.cooked?.trimEnd()
+    templateLiteral.quasis[templateLiteral.quasis.length - 1].value.raw = templateLiteral.quasis[templateLiteral.quasis.length - 1].value.raw.trimEnd()
+    templateLiteral.quasis[templateLiteral.quasis.length - 1].value.cooked = templateLiteral.quasis[templateLiteral.quasis.length - 1].value.cooked?.trimEnd()
     // last quasis element should have tail as true
     templateLiteral.quasis[templateLiteral.quasis.length - 1].tail = true
 
@@ -41,19 +39,16 @@ const createTemplateLiteral = (cssModExpr: (string | t.MemberExpression)[]) => {
  *
  * eg. `<module-name>[<class-name>]`
  */
-export const createModuleMemberExpression = (
-    classname: string,
-    module: string,
-    modules: Modules
-): t.MemberExpression => {
+export const createModuleMemberExpression = (classname: string, module: string, modules: Modules): t.MemberExpression => {
     let moduleIdentifier: t.Identifier
     let classnameStringLiteral = t.stringLiteral(classname)
 
     if (module == modules.defaultModule) {
         moduleIdentifier = t.identifier(modules.defaultModule)
     } else {
-        if (!(module in modules.namedModules))
-            throw new CSSModuleError(`module '${chalk.green(module)}' on class '${chalk.cyan(classname)}' not found`)
+        if (!(module in modules.namedModules)) {
+            throw new CSSModuleError(`Module '${chalk.green(module)}' on class '${chalk.cyan(classname)}' not found`)
+        }
 
         moduleIdentifier = t.identifier(modules.namedModules[module])
     }
@@ -75,47 +70,52 @@ export const getTemplFromStrCls = (classString: string, modules: Modules): t.Tem
 
     let classList = classString.split(" ")
     let splittedClass = classList.map((classname) => {
-        return splitClsName(classname, modules.defaultModule!) // typescript still complains even though we throw error when defaultModule is undefined
+        return splitClsName(classname, modules.defaultModule ?? "")
     })
     let classAsModule = splittedClass.map((classObj) => {
-        if (classObj.module) return createModuleMemberExpression(classObj.classname, classObj.module, modules)
-        else return classObj.classname
+        if (classObj.module) {
+            return createModuleMemberExpression(classObj.classname, classObj.module, modules)
+        } else {
+            return classObj.classname
+        }
     })
     return createTemplateLiteral(classAsModule)
 }
 
 /**
- *
+ * A helper function to identify Kind of import source.
  * @param statement import statement from the source
  * @returns object representing type of import used and specifier present
  */
 export const getImportInfo = (statement: t.ImportDeclaration): DefaultModule | ModuleWithSpecifier | NamedModule => {
     let module = splitModuleSource(statement.source.value)
+
+    // .length is either 0 or 1.
     if (statement.specifiers.length) {
+        // Syntax: import style from "./m1.module.css"
+        //
         // all the checks are done inside the visitor for the
         // presence of only default specifier in case if any specifier is present
-        // eg. import style from "./m1.module.css"
         return {
             moduleSource: module.moduleSource,
             default: false,
             hasSpecifier: true,
         }
     } else if (!module.moduleName) {
-        // eg. import "./moduleA.module.css"
-
+        // Syntax: import "./moduleA.module.css"
         return {
             moduleSource: module.moduleSource,
             default: true,
             hasSpecifier: false,
         }
-    }
-
-    // eg. import "./moduleA.module.css:m1"
-    return {
-        moduleSource: module.moduleSource,
-        moduleName: module.moduleName,
-        default: false,
-        hasSpecifier: false,
+    } else {
+        // Syntax: import "./moduleA.module.css:m1"
+        return {
+            moduleSource: module.moduleSource,
+            moduleName: module.moduleName,
+            default: false,
+            hasSpecifier: false,
+        }
     }
 }
 

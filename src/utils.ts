@@ -13,6 +13,7 @@ export const splitClsName = (classname: string, defaultModule: string): { classn
         // TODO: throw error if more than one sep is present, or use last sep in the classname to split
         let [splittedClassName, module] = classname.split(":")
         if (module === "") {
+            // TODO: silently use defaultModule?
             throw new CSSModuleError(`no module name found after ':' on ${CSSModuleError.cls(classname)}`)
         }
         return {
@@ -35,6 +36,12 @@ export const splitClassnames = (classes: string) => {
     return classes.split(" ")
 }
 
+/**
+ * Splits module source into module source and user-provided module name
+ * eg. `"moduleA.module.css:m1"` -> `{ moduleSource: "moduleA.module.css", moduleName: "m1" }`
+ * @param source - module spec that contains a module source path and a user provided module name eg. `"moduleA.module.css:m1"`
+ * @returns object with module source and user provided module name
+ */
 export const splitModuleSource = (source: string): { moduleSource: string; moduleName?: string } => {
     if (!source.includes(":")) {
         return {
@@ -53,9 +60,7 @@ export class CSSModuleError extends Error {
         super()
         this.errorMessage = errorMessage
         this.name = chalk.red("CSSModuleError")
-        this.message = `at (${CSSModuleError.path?.node.loc?.start.line}:${
-            CSSModuleError.path?.node.loc?.start.column
-        }): 
+        this.message = `at (${CSSModuleError.path?.node.loc?.start.line}:${CSSModuleError.path?.node.loc?.start.column}):
         ${this.errorMessage.replace(/ +/g, " ")}
         `.replace(/ +/g, " ")
     }
