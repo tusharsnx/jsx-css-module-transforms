@@ -1,5 +1,5 @@
-import { NodePath } from "@babel/core"
-import chalk from "chalk"
+import { NodePath } from "@babel/core";
+import chalk from "chalk";
 
 /**
  * splits full classname (with ':') into classname and module name
@@ -11,30 +11,30 @@ import chalk from "chalk"
 export const splitClsName = (classname: string, defaultModule: string): { classname: string; module?: string } => {
     if (shouldTransform(classname)) {
         // TODO: throw error if more than one sep is present, or use last sep in the classname to split
-        let [splittedClassName, module] = classname.split(":")
+        let [splittedClassName, module] = classname.split(":");
         if (module === "") {
             // TODO: silently use defaultModule?
-            throw new CSSModuleError(`no module name found after ':' on ${CSSModuleError.cls(classname)}`)
+            throw new CSSModuleError(`no module name found after ':' on ${CSSModuleError.cls(classname)}`);
         }
         return {
             classname: splittedClassName.trim(),
             module: module || defaultModule,
-        }
+        };
     } else {
         // global class
         return {
             classname: classname.slice(0, classname.length - 2),
-        }
+        };
     }
-}
+};
 
 export const shouldTransform = (classname: string) => {
-    return !classname.endsWith(":g")
-}
+    return !classname.endsWith(":g");
+};
 
 export const splitClassnames = (classes: string) => {
-    return classes.split(" ")
-}
+    return classes.split(" ");
+};
 
 /**
  * Splits module source into module source and user-provided module name
@@ -46,30 +46,30 @@ export const splitModuleSource = (source: string): { moduleSource: string; modul
     if (!source.includes(":")) {
         return {
             moduleSource: source,
-        }
+        };
     }
-    let [moduleSource, moduleName] = source.split(":")
-    return { moduleSource, moduleName }
-}
+    let [moduleSource, moduleName] = source.split(":");
+    return { moduleSource, moduleName };
+};
 
 export class CSSModuleError extends Error {
-    errorMessage: string
-    static path: NodePath | undefined
+    errorMessage: string;
+    static path: NodePath | undefined;
 
     constructor(errorMessage: string) {
-        super()
-        this.errorMessage = errorMessage
-        this.name = chalk.red("CSSModuleError")
+        super();
+        this.errorMessage = errorMessage;
+        this.name = chalk.red("CSSModuleError");
         this.message = `at (${CSSModuleError.path?.node.loc?.start.line}:${CSSModuleError.path?.node.loc?.start.column}):
         ${this.errorMessage.replace(/ +/g, " ")}
-        `.replace(/ +/g, " ")
+        `.replace(/ +/g, " ");
     }
 
     static cls(cls: string) {
-        return `'${chalk.cyan(cls)}'`
+        return `'${chalk.cyan(cls)}'`;
     }
 
     static mod(mod: string) {
-        return `'${chalk.cyan(mod)}'`
+        return `'${chalk.cyan(mod)}'`;
     }
 }
