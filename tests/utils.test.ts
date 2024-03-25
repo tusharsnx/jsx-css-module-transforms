@@ -1,7 +1,7 @@
 import * as t from "@babel/types"
 
-import { splitClsName, shouldTransform, CSSModuleError } from "../src/utils"
-import { createModuleMemberExpression } from "../src/transforms"
+import { splitClsName, shouldTransform, CSSModuleError } from "../dist/utils.js"
+import { createModuleMemberExpression } from "../dist/transforms.js"
 
 // testing splitModuleName
 describe("split string into module and classnames", () => {

@@ -3,8 +3,8 @@ import { types as t } from "@babel/core";
 import type babel from "@babel/core";
 import chalk from "chalk";
 
-import { getImportInfo, getTemplFromStrCls } from "./transforms";
-import { CSSModuleError } from "./utils";
+import { getImportInfo, getTemplFromStrCls } from "./transforms.js";
+import { CSSModuleError } from "./utils.js";
 
 function ImportDeclaration(path: NodePath<t.ImportDeclaration>, state: PluginPass) {
     // we're only interested in scss/sass/css imports

@@ -3,28 +3,42 @@
     "version": "0.2.2-beta",
     "description": "A babel plugin to transform string classnames into css-module classnames",
     "license": "MIT",
-    "exports": "./dist/index.js",
     "author": "Tushar Singh",
     "repository": "github:tusharsnn/jsx-css-module-transforms",
+    "type": "module",
+    "module": "dist/plugin.js",
+    "types": "dist/plugin.d.ts",
+    "main": "dist/plugin.cjs",
+    "exports": {
+        ".": {
+            "import": "./dist/plugin.js",
+            "require": "./dist/plugin.cjs",
+            "types": "./dist/plugin.d.ts"
+        }
+    },
+    "files": [
+        "dist"
+    ],
     "keywords": [
         "module-classname-transforms"
     ],
     "scripts": {
-        "build": "tsc -p tsconfig.build.json",
-        "test": "jest --verbose",
-        "test:cov": "jest --verbose --coverage",
-        "dev": "tsc -p tsconfig.json"
+        "build": "tsup",
+        "test": "npm run build && NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --verbose",
+        "test:cov": "npm run build && NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --verbose --coverage",
+        "dev": "tsup --watch"
     },
     "dependencies": {
-        "@babel/core": "^7.17.10",
+        "@babel/core": "^7.24.3",
         "chalk": "^4.1.2"
     },
     "devDependencies": {
         "@babel/plugin-syntax-jsx": "^7.17.12",
-        "@types/babel__core": "^7.1.19",
+        "@types/babel__core": "^7.20.5",
         "@types/jest": "^27.5.0",
         "jest": "^28.1.0",
         "ts-jest": "^28.0.2",
-        "typescript": "^4.6.4"
+        "tsup": "^8.0.2",
+        "typescript": "^4.9.5"
     }
 }
