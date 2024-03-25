@@ -3,7 +3,7 @@ import type { Options } from "tsup";
 const isProduction = process.env.NODE_ENV == "production";
 
 export default <Options>{
-    entry: ["src/*.ts"],
+    entry: ["src/*.ts", "!*/*.d.ts"],
     clean: true,
     format: ["cjs", "esm"],
     dts: true,
