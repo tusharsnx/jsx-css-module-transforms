@@ -2,13 +2,13 @@
     "name": "jsx-css-module-transforms",
     "version": "0.2.2-beta",
     "description": "A babel plugin to transform string classnames into css-module classnames",
+    "license": "MIT",
     "exports": "./dist/index.js",
+    "author": "Tushar Singh",
+    "repository": "github:tusharsnn/jsx-css-module-transforms",
     "keywords": [
         "module-classname-transforms"
     ],
-    "author": "Tushar Singh",
-    "license": "MIT",
-    "repository": "github:tusharsnn/jsx-css-module-transforms",
     "scripts": {
         "build": "tsc -p tsconfig.build.json",
         "test": "jest --verbose",
