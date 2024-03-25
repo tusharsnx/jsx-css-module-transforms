@@ -64,7 +64,7 @@ function ImportDeclaration(path: NodePath<t.ImportDeclaration>, state: PluginPas
 }
 
 function JSXAttribute(path: NodePath<t.JSXAttribute>, state: PluginPass) {
-    const firstNamedModule = getFirstNamedModule(state.pluginState.modules.namedModules)
+    const firstNamedModule = getFirstNamedModule(state.pluginState.modules.namedModules);
 
     // we only support className attribute having a string value
     if (path.node.name.name != "className" || !t.isStringLiteral(path.node.value)) {

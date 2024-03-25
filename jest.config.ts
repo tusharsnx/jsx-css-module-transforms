@@ -1,4 +1,4 @@
-import type { InitialOptionsTsJest } from 'ts-jest';
+import type { InitialOptionsTsJest } from "ts-jest";
 
 module.exports = <InitialOptionsTsJest>{
     preset: "ts-jest/presets/default-esm",
