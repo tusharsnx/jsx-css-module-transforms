@@ -64,12 +64,15 @@ function ImportDeclaration(path: NodePath<t.ImportDeclaration>, state: PluginPas
 }
 
 function JSXAttribute(path: NodePath<t.JSXAttribute>, state: PluginPass) {
+    const firstNamedModule = getFirstNamedModule(state.pluginState.modules.namedModules)
+
     // we only support className attribute having a string value
     if (path.node.name.name != "className" || !t.isStringLiteral(path.node.value)) {
         return;
     }
-    // className values should be transformed only if we ever found a css module
-    if (!state.pluginState.modules.defaultModule && !state.pluginState.modules.namedModules) {
+    // className values should be transformed only if we ever found a css module.
+    // FirstNamedModule signifies that we found at least one named css module.
+    if (!state.pluginState.modules.defaultModule && !firstNamedModule) {
         return;
     }
 
@@ -78,7 +81,6 @@ function JSXAttribute(path: NodePath<t.JSXAttribute>, state: PluginPass) {
 
     // if no default modules is available, make the first modules as default
     if (!state.pluginState.modules.defaultModule) {
-        let firstNamedModule = getFirstNamedModule(state.pluginState.modules.namedModules);
         if (firstNamedModule) {
             state.pluginState.modules.defaultModule = state.pluginState.modules.namedModules[firstNamedModule];
         }
