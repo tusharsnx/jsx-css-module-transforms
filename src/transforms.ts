@@ -1,8 +1,8 @@
 import * as t from "@babel/types";
 import chalk from "chalk";
 
-import { CSSModuleError, splitClsName, splitModuleSource } from "./utils";
-import type { Modules } from "./index";
+import { CSSModuleError, splitClsName, splitModuleSource } from "./utils.js";
+import type { Modules } from "./plugin.js";
 
 /**
  * generates template literal using css-module classes as expressions

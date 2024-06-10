@@ -1,26 +1,26 @@
 {
     "compilerOptions": {
         "strict": true,
-        "allowSyntheticDefaultImports": true,
         "forceConsistentCasingInFileNames": true,
-        "noImplicitAny": true,
-        "module": "commonjs",
-        "target": "es6",
-        "allowJs": true,
-        "moduleResolution": "node",
+        "module": "Node16",
+        "moduleResolution": "Node16",
+        "target": "ES6",
         "esModuleInterop": true,
-        "sourceMap": true,
-        "outDir": "./dev"
-    },
-    "ts-node": {
-        "transpileOnly": true,
-        "sourceMap": true,
+        "noImplicitAny": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "skipLibCheck": true,
+        "isolatedModules": true,
+        // These options are controlled by the tsup config
+        "sourceMap": false,
+        "declaration": false,
+        "outDir": ""
     },
     "include": [
-        "src/*.ts",
-        "tests/*.ts"
+        "./src/**/*.ts",
     ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "dist",
     ]
 }

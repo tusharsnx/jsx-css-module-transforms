@@ -1,6 +1,9 @@
 **/node_modules/
 dev/
-demo-project/
+
+# test projects for testing and prototyping
+test-projects/
+
 .vscode/
 **/coverage/
 dist/

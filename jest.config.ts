@@ -1,14 +1,9 @@
-/*
- * For a detailed explanation regarding each configuration property and type check, visit:
- * https://jestjs.io/docs/configuration
- */
+import type { Config } from "jest";
 
-export default {
-    preset: "ts-jest",
-    globals: {
-        "ts-jest": {
-            tsconfig: "tsconfig.json",
-        },
-    },
-    testPathIgnorePatterns: ["/node_modules/", "dev/"],
-}
+const config: Config = {
+    preset: "ts-jest/presets/default-esm",
+    testEnvironment: "node",
+    extensionsToTreatAsEsm: [".ts"],
+};
+
+export default config;
