@@ -1,13 +1,9 @@
-import type { InitialOptionsTsJest } from "ts-jest";
+import type { Config } from "jest";
 
-module.exports = <InitialOptionsTsJest>{
+const config: Config = {
     preset: "ts-jest/presets/default-esm",
     testEnvironment: "node",
-    globals: {
-        "ts-jest": {
-            // ts-jest needs to be told to use ESM. Choosing
-            // an esm preset for ts-jest doesn't imply useEsm (??).
-            useESM: true,
-        },
-    },
+    extensionsToTreatAsEsm: [".ts"],
 };
+
+export default config;

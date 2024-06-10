@@ -6,14 +6,14 @@
     "author": "Tushar Singh",
     "repository": "github:tusharsnn/jsx-css-module-transforms",
     "type": "module",
-    "module": "dist/plugin.js",
-    "types": "dist/plugin.d.ts",
-    "main": "dist/plugin.cjs",
+    "module": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "main": "dist/index.cjs",
     "exports": {
         ".": {
-            "import": "./dist/plugin.js",
-            "require": "./dist/plugin.cjs",
-            "types": "./dist/plugin.d.ts"
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs",
+            "types": "./dist/index.d.ts"
         }
     },
     "files": [
@@ -23,21 +23,33 @@
         "module-classname-transforms"
     ],
     "scripts": {
-        "build": "tsup",
-        "test": "npm run build && NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --verbose",
-        "test:cov": "npm run build && NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --verbose --coverage",
-        "dev": "tsup --watch"
+        "build": "NODE_ENV=production npx tsup-node --config tsup.build.config.ts",
+        "dev": "npx tsup-node --watch",
+        "dev:nowatch": "npx tsup-node",
+        "test": "npm run dev:nowatch && NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --verbose",
+        "test:cov": "npm run dev:nowatch && NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --verbose --coverage"
     },
     "dependencies": {
         "@babel/core": "^7.24.3",
-        "chalk": "^4.1.2"
+        "chalk": "^4.1.2",
+        "unplugin": "^1.10.1"
+    },
+    "peerDependencies": {
+        "@babel/plugin-syntax-jsx": "^7.24.1",
+        "webpack": "^5.91.0"
+    },
+    "peerDependenciesMeta": {
+        "webpack": {
+            "optional": true
+        }
     },
     "devDependencies": {
         "@babel/plugin-syntax-jsx": "^7.17.12",
         "@types/babel__core": "^7.20.5",
-        "@types/jest": "^27.5.0",
-        "jest": "^28.1.0",
-        "ts-jest": "^28.0.2",
+        "@types/jest": "^29.5.12",
+        "@types/node": "^20.14.2",
+        "jest": "^29.7.0",
+        "ts-jest": "^29.1.4",
         "tsup": "^8.0.2",
         "typescript": "^4.9.5"
     }

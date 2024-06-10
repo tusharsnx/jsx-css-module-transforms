@@ -1,6 +1,6 @@
 import babel from "@babel/core";
-import API from "../dist/plugin.js";
-import { CSSModuleError } from "../dist/utils.js";
+import API from "../dev/plugin.js";
+import { CSSModuleError } from "../dev/utils.js";
 
 async function runWithBabel(source: string) {
     let transformed = await babel.transformAsync(source, {
@@ -13,41 +13,41 @@ describe("single imports", () => {
     test("default module", async () => {
         let source = `import "./foo.module.scss"`;
         let code = await runWithBabel(source);
-        expect(code).toMatchInlineSnapshot(`"import _style from \\"./foo.module.scss\\";"`);
+        expect(code).toMatchInlineSnapshot(`"import _style from "./foo.module.scss";"`);
 
         source = `import "./foo.module.css"`;
         code = await runWithBabel(source);
-        expect(code).toMatchInlineSnapshot(`"import _style from \\"./foo.module.css\\";"`);
+        expect(code).toMatchInlineSnapshot(`"import _style from "./foo.module.css";"`);
     });
 
     test("with specifier", async () => {
         let source = `import style from "./foo.module.scss"`;
         let code = await runWithBabel(source);
-        expect(code).toMatchInlineSnapshot(`"import style from \\"./foo.module.scss\\";"`);
+        expect(code).toMatchInlineSnapshot(`"import style from "./foo.module.scss";"`);
 
         source = `import style from "./foo.module.css"`;
         code = await runWithBabel(source);
-        expect(code).toMatchInlineSnapshot(`"import style from \\"./foo.module.css\\";"`);
+        expect(code).toMatchInlineSnapshot(`"import style from "./foo.module.css";"`);
     });
 
     test("with specifier (ignore names)", async () => {
         let source = `import style from "./foo.module.scss:m1"`;
         let code = await runWithBabel(source);
-        expect(code).toMatchInlineSnapshot(`"import style from \\"./foo.module.scss\\";"`);
+        expect(code).toMatchInlineSnapshot(`"import style from "./foo.module.scss";"`);
 
         source = `import style from "./foo.module.css:m1"`;
         code = await runWithBabel(source);
-        expect(code).toMatchInlineSnapshot(`"import style from \\"./foo.module.css\\";"`);
+        expect(code).toMatchInlineSnapshot(`"import style from "./foo.module.css";"`);
     });
 
     test("with named-module", async () => {
         let source = `import "./foo.module.scss:m1"`;
         let code = await runWithBabel(source);
-        expect(code).toMatchInlineSnapshot(`"import _m from \\"./foo.module.scss\\";"`);
+        expect(code).toMatchInlineSnapshot(`"import _m from "./foo.module.scss";"`);
 
         source = `import "./foo.module.css:m1"`;
         code = await runWithBabel(source);
-        expect(code).toMatchInlineSnapshot(`"import _m from \\"./foo.module.css\\";"`);
+        expect(code).toMatchInlineSnapshot(`"import _m from "./foo.module.css";"`);
     });
 
     test("multiple imports on single module", async () => {
@@ -77,8 +77,8 @@ describe("imports multiple module", () => {
         `;
         let code = await runWithBabel(source);
         expect(code).toMatchInlineSnapshot(`
-"import _m from \\"./module1.module.css\\";
-import _m2 from \\"./module2.module.css\\";"
+"import _m from "./module1.module.css";
+import _m2 from "./module2.module.css";"
 `);
     });
 
@@ -97,8 +97,8 @@ import _m2 from \\"./module2.module.css\\";"
         `;
         let code = await runWithBabel(source);
         expect(code).toMatchInlineSnapshot(`
-"import style from \\"./module1.module.css\\";
-import style1 from \\"./module2.module.css\\";"
+"import style from "./module1.module.css";
+import style1 from "./module2.module.css";"
 `);
     });
 
@@ -120,9 +120,9 @@ describe("different kinds together", () => {
         `;
         let code = await runWithBabel(source);
         expect(code).toMatchInlineSnapshot(`
-"import style from \\"./module1.module.css\\";
-import _m from \\"./module2.module.css\\";
-import _style from \\"./module3.module.css\\";"
+"import style from "./module1.module.css";
+import _m from "./module2.module.css";
+import _style from "./module3.module.css";"
 `);
     });
 
@@ -156,9 +156,9 @@ describe("jsx with single css-module", () => {
         `;
         let code = await runWithBabel(source);
         expect(code).toMatchInlineSnapshot(`
-"import _style from \\"./component.module.css\\";
+"import _style from "./component.module.css";
 function Component() {
-  return <h1 className={\`\${_style[\\"foo-bar\\"]} \${_style[\\"baz\\"]}\`}></h1>;
+  return <h1 className={\`\${_style["foo-bar"]} \${_style["baz"]}\`}></h1>;
 }"
 `);
     });
@@ -173,9 +173,9 @@ function Component() {
         `;
         let code = await runWithBabel(source);
         expect(code).toMatchInlineSnapshot(`
-"import style from \\"./component.module.css\\";
+"import style from "./component.module.css";
 function Component() {
-  return <h1 className={\`\${style[\\"foo-bar\\"]} \${style[\\"baz\\"]}\`}></h1>;
+  return <h1 className={\`\${style["foo-bar"]} \${style["baz"]}\`}></h1>;
 }"
 `);
     });
@@ -190,9 +190,9 @@ function Component() {
         `;
         let code = await runWithBabel(source);
         expect(code).toMatchInlineSnapshot(`
-"import _m from \\"./component.module.css\\";
+"import _m from "./component.module.css";
 function Component() {
-  return <h1 className={\`\${_m[\\"foo-bar\\"]} \${_m[\\"baz\\"]}\`}></h1>;
+  return <h1 className={\`\${_m["foo-bar"]} \${_m["baz"]}\`}></h1>;
 }"
 `);
     });
@@ -221,10 +221,10 @@ describe("jsx with multiple modules", () => {
         `;
         let code = await runWithBabel(source);
         expect(code).toMatchInlineSnapshot(`
-"import \\"./component.css\\";
-import \\"./layout.css\\";
+"import "./component.css";
+import "./layout.css";
 function component() {
-  return <h1 className=\\"foo-bar baz\\"></h1>;
+  return <h1 className="foo-bar baz"></h1>;
 }"
 `);
     });
@@ -240,10 +240,10 @@ function component() {
         `;
         let code = await runWithBabel(source);
         expect(code).toMatchInlineSnapshot(`
-"import style from \\"./component.module.css\\";
-import layout from \\"./layout.module.css\\";
+"import style from "./component.module.css";
+import layout from "./layout.module.css";
 function Component() {
-  return <h1 className={\`\${layout[\\"foo-bar\\"]} \${style[\\"baz\\"]}\`}></h1>;
+  return <h1 className={\`\${layout["foo-bar"]} \${style["baz"]}\`}></h1>;
 }"
 `);
     });
@@ -259,10 +259,10 @@ function Component() {
         `;
         let code = await runWithBabel(source);
         expect(code).toMatchInlineSnapshot(`
-"import _style from \\"./component.module.css\\";
-import _layout from \\"./layout.module.css\\";
+"import _style from "./component.module.css";
+import _layout from "./layout.module.css";
 function Component() {
-  return <h1 className={\`\${_layout[\\"foo-bar\\"]} \${_style[\\"baz\\"]}\`}></h1>;
+  return <h1 className={\`\${_layout["foo-bar"]} \${_style["baz"]}\`}></h1>;
 }"
 `);
     });
@@ -309,12 +309,12 @@ describe("jsx with multiple kinds of module", () => {
         `;
         let code = await runWithBabel(source);
         expect(code).toMatchInlineSnapshot(`
-"import style from \\"./component.module.css\\";
-import layout from \\"./layout.module.css\\";
-import _altLayout from \\"./layout2.module.css\\";
+"import style from "./component.module.css";
+import layout from "./layout.module.css";
+import _altLayout from "./layout2.module.css";
 function Component() {
-  return <div className={\`\${layout[\\"grid-1\\"]} \${_altLayout[\\"col-3\\"]}\`}>
-                        <h1 className={\`\${style[\\"clr-green\\"]}\`}></h1>
+  return <div className={\`\${layout["grid-1"]} \${_altLayout["col-3"]}\`}>
+                        <h1 className={\`\${style["clr-green"]}\`}></h1>
                     </div>;
 }"
 `);
@@ -336,12 +336,12 @@ function Component() {
         `;
         let code = await runWithBabel(source);
         expect(code).toMatchInlineSnapshot(`
-"import style from \\"./component.module.css\\";
-import layout from \\"./layout.module.css\\";
-import _altLayout from \\"./layout2.module.css\\";
+"import style from "./component.module.css";
+import layout from "./layout.module.css";
+import _altLayout from "./layout2.module.css";
 function Component() {
-  return <div className={\`\${layout[\\"grid-1\\"]} \${_altLayout[\\"col-3\\"]}\`}>
-                        <h1 className={\`bg-primary \${style[\\"clr-green\\"]}\`}></h1>
+  return <div className={\`\${layout["grid-1"]} \${_altLayout["col-3"]}\`}>
+                        <h1 className={\`bg-primary \${style["clr-green"]}\`}></h1>
                     </div>;
 }"
 `);

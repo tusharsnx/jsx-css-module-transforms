@@ -4,14 +4,22 @@
         "forceConsistentCasingInFileNames": true,
         "module": "Node16",
         "moduleResolution": "Node16",
-        "target": "es6",
-        // without this, jest/ts-jest may hang and never finish
-        "allowJs": true,
+        "target": "ES6",
         "esModuleInterop": true,
-        "sourceMap": true,
-        "outDir": "./dist"
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "skipLibCheck": true,
+        "isolatedModules": true,
+        // These options are controlled by the tsup config
+        "sourceMap": false,
+        "declaration": false,
+        "outDir": ""
     },
+    "include": [
+        "./src/**/*.ts",
+    ],
     "exclude": [
         "node_modules",
+        "dist",
     ]
 }

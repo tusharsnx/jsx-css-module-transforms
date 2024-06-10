@@ -94,7 +94,7 @@ function JSXAttribute(path: NodePath<t.JSXAttribute>, state: PluginPass) {
     path.skip();
 }
 
-function API({ types: t }: typeof babel): PluginObj<PluginPass> {
+function API(): PluginObj<PluginPass> {
     /**
      *  Sets up the initial state of the plugin
      */
