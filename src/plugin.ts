@@ -61,6 +61,7 @@ function ImportDeclaration(path: NodePath<t.ImportDeclaration>, state: PluginPas
 
     // strips away module name from the source
     path.node.source.value = moduleInfo.moduleSource; // this inplace replacment does not causes any problem with the ast
+    path.skip();
 }
 
 function JSXAttribute(path: NodePath<t.JSXAttribute>, state: PluginPass) {
