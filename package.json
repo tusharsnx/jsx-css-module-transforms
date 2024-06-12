@@ -7,7 +7,7 @@
     "repository": "github:tusharsnn/jsx-css-module-transforms",
     "type": "module",
     "module": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "types": "dist/index.d.cts",
     "main": "dist/index.cjs",
     "exports": {
         ".": {
@@ -23,19 +23,22 @@
         "module-classname-transforms"
     ],
     "scripts": {
-        "build": "NODE_ENV=production npx tsup-node --config tsup.build.config.ts",
+        "release": "npx tsup-node --config tsup.build.config.ts",
+        "build": "npx tsup-node --config tsup.build.config.ts --sourcemap --watch",
+        "build:nowatch": "npx tsup-node --config tsup.build.config.ts --sourcemap",
         "dev": "npx tsup-node --watch",
         "dev:nowatch": "npx tsup-node",
-        "test": "npm run dev:nowatch && NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --verbose",
-        "test:cov": "npm run dev:nowatch && NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --verbose --coverage"
+        "test": "npm run dev:nowatch && NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
+        "test:cov": "npm run dev:nowatch && NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --coverage"
     },
     "dependencies": {
         "@babel/core": "^7.24.3",
+        "@babel/plugin-syntax-jsx": "^7.24.7",
+        "@babel/plugin-syntax-typescript": "^7.24.7",
         "chalk": "^4.1.2",
         "unplugin": "^1.10.1"
     },
     "peerDependencies": {
-        "@babel/plugin-syntax-jsx": "^7.24.1",
         "webpack": "^5.91.0"
     },
     "peerDependenciesMeta": {
@@ -44,7 +47,6 @@
         }
     },
     "devDependencies": {
-        "@babel/plugin-syntax-jsx": "^7.17.12",
         "@types/babel__core": "^7.20.5",
         "@types/jest": "^29.5.12",
         "@types/node": "^20.14.2",

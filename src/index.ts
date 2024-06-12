@@ -1,31 +1,42 @@
-import { transformAsync } from "@babel/core";
+import { transformSync } from "@babel/core";
 import { createWebpackPlugin } from "unplugin";
 import type { UnpluginOptions } from "unplugin";
-import plugin from "./plugin.js";
+import type { PluginItem } from "@babel/core";
+import Plugin from "./plugin.js";
 import { CSSModuleError } from "./utils.js";
 
-function unpluginFactory(): UnpluginOptions {
+export interface PluginOptions {
+    sourcemap: boolean;
+}
+
+function unpluginFactory(userOpts: PluginOptions): UnpluginOptions {
     return {
         name: "jsx-css-module-transforms",
+        enforce: "pre",
 
         transformInclude(id) {
-            const result = /\.tsx?$/i.test(id);
-            return result;
+            return /\.[jt]sx$/i.test(id);
         },
 
-        async transform(code, id) {
-            // babel's transformSync cannot be used with ESM based plugin
-            const result = await transformAsync(code, {
+        transform(code, id) {
+            let plugins: PluginItem[] = ["@babel/plugin-syntax-jsx", Plugin];
+
+            const isTSX = /\.tsx$/i.test(id);
+            if (isTSX) {
+                plugins.unshift(["@babel/plugin-syntax-typescript", { isTSX: true }]);
+            }
+
+            const result = transformSync(code, {
                 filename: id,
-                plugins: ["@babel/plugin-syntax-jsx", plugin],
-                sourceMaps: process.env.NODE_ENV == "production" ? false : "inline",
+                sourceMaps: userOpts.sourcemap,
+                plugins,
             });
 
-            if (!result?.code) {
+            if (!result || !result.code) {
                 throw new CSSModuleError(`Could not transform ${id}`);
             }
 
-            return result.code;
+            return { code: result.code, map: result.map };
         },
     };
 }

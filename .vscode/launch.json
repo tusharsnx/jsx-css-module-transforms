@@ -1,0 +1,46 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Next.js: debug server-side",
+            "preLaunchTask": "Build",
+            "type": "node",
+            "env": {
+                "NODE_OPTIONS": "--inspect",
+            },
+            "request": "launch",
+            "cwd": "${workspaceFolder}/test-projects/nextjs",
+            "program": "${workspaceFolder}/test-projects/nextjs/node_modules/next/dist/bin/next",
+            "args": [
+                "dev"
+            ],
+        },
+        {
+            "name": "Next.js: debug client-side",
+            "preLaunchTask": "Build",
+            "type": "chrome",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/test-projects/nextjs",
+            "url": "http://localhost:3000"
+        },
+        {
+            "name": "Next.js: debug full stack",
+            "preLaunchTask": "Build",
+            "type": "node",
+            "request": "launch",
+            "env": {
+                "NODE_OPTIONS": "--inspect"
+            },
+            "program": "${workspaceFolder}/test-projects/nextjs/node_modules/next/dist/bin/next",
+            "args": [
+                "dev",
+            ],
+            "cwd": "${workspaceFolder}/test-projects/nextjs",
+            "serverReadyAction": {
+                "pattern": "- Local:.+(https?://.+)",
+                "uriFormat": "%s",
+                "action": "debugWithChrome"
+            },
+        }
+    ]
+}
