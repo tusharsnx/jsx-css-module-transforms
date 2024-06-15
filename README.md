@@ -4,7 +4,7 @@
 
 - Faster to write ⚡
 - Improves code readability 📖
-- Supports multiple CSS Module in a file using [Named modules](#named-modules) ✨
+- Supports multiple CSS Modules using [Named modules](#named-modules) ✨
 - Works with CSS, SASS, and SCSS modules 🔥
 
 ```jsx
@@ -82,13 +82,13 @@ This improves readability and follows the same pattern as regular CSS.
 
 ## Global styles
 
-By default, if plugin finds `'.module.css'` import in the file, it will
-apply transformations to **all** CSS classes within that file. However,
-you may want to use regular css classnames and prevent transformation
-on them. This can be done by adding `:g` at the end of the classname:
+When the plugin finds `'.module.css'` import in the file, it will transform
+**all** CSS classnames to use the imported CSS module. However, you may want
+to use regular CSS classnames and prevent transformations on them. This
+can be done by adding `:g` at the end of the classname:
 
 ```jsx
-import "./m1.module.css"
+import "./style.module.css"
 
 function Component() {
     return <div className="card-layout:g card-rnd-1"></div>
