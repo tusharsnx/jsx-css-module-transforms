@@ -53,6 +53,12 @@ export function createModuleMemberExpression(classname: string, module: string, 
         moduleIdentifier = t.identifier(modules.namedModules[module]);
     }
 
+    // When a class has dashes in its name, e.g. `.my-class`, it can be
+    // read from the imported style object in two ways:
+    // - Remove dash and camelCase the class name: `style.myClass`.
+    // - Use the bracket syntax for reading object property: `style["my-class"]`.
+    // The latter has the benefit that we can avoid transforming the classname string
+    // and just use it in the generated MemberExpression. Set `computed` to true to use the bracket syntax
     return t.memberExpression(moduleIdentifier, classnameStringLiteral, true);
 }
 
