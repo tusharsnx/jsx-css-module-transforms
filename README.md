@@ -85,13 +85,13 @@ This improves readability and follows the same pattern as regular CSS.
 When the plugin finds `'.module.css'` import in the file, it will transform
 **all** CSS classnames to use the imported CSS module. However, you may want
 to use regular CSS classnames and prevent transformations on them. This
-can be done by adding `:g` at the end of the classname:
+can be done by adding `g:` at the start of the classname:
 
 ```jsx
 import "./style.module.css"
 
 function Component() {
-    return <div className="card-layout:g card-rnd-1"></div>
+    return <div className="g:card-layout card-rnd-1"></div>
 }
 ```
 
@@ -120,11 +120,11 @@ function Component() {
 You can use multiple CSS module within a file using Named modules.
 
 To use Named CSS modules, you can add labels to each CSS module import
-in the file by adding `:<module-name>` at the end of the path:
+in the file by adding `<module-name>:` at the end of the path:
 
 ```jsx
-import "./layout.module.css:layout"
-import "./component.module.css:com"
+import "layout:./layout.module.css"
+import "com:./component.module.css"
 ```
 
 And use the same labels for writing your classnames:
@@ -132,9 +132,9 @@ And use the same labels for writing your classnames:
 ```jsx
 function Component() {
     return (
-        <ul className="food-items:layout">
-            <li className="food-item:com"></li>
-            <li className="food-item:com"></li>
+        <ul className="layout:food-items">
+            <li className="com:food-item"></li>
+            <li className="com:food-item"></li>
         </ul>
     )
 }

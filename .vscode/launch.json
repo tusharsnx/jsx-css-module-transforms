@@ -2,6 +2,21 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug tests",
+            "preLaunchTask": "Build",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "type": "node",
+            "runtimeExecutable": "npm",
+            "args": [
+                "run",
+                "test"
+            ],
+            "env": {
+                "NODE_OPTIONS": "--inspect",
+            },
+        },
+        {
             "name": "Next.js: debug server-side",
             "preLaunchTask": "Build",
             "type": "node",

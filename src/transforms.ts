@@ -1,145 +1,148 @@
 import * as t from "@babel/types";
 import chalk from "chalk";
 
-import { CSSModuleError, splitClsName, splitModuleSource } from "./utils.js";
+import { CSSModuleError } from "./utils.js";
 import type { Modules } from "./plugin.js";
 
-/**
- * generates template literal using css-module classes as expressions
- * and global classes as quasis
- *
- * @param cssModExpr array of string(representing global class) and memberExpression(representing css-module class)
- */
-function createTemplateLiteral(cssModExpr: (string | t.MemberExpression)[]) {
-    let templateLiteral: t.TemplateLiteral = t.templateLiteral([t.templateElement({ raw: "", cooked: "" })], []); // quasis must be 1 more than expression while creating templateLiteral
+type TransformImportResult = {
+    transformedNode: t.ImportDeclaration;
+    generatedSpecifier: boolean;
+    moduleLabel?: string;
+};
 
-    cssModExpr.forEach((expression) => {
-        if (typeof expression === "string") {
-            // overwrite the previous quasis element to include this classname
-            templateLiteral.quasis[templateLiteral.quasis.length - 1].value.raw += expression + " ";
-            templateLiteral.quasis[templateLiteral.quasis.length - 1].value.cooked += expression + " "; // assigning cooked value is not needed but it saves from weird edge cases where plugins only uses cooked value and ignores raw value (eg. @babel/preset-env).
+/**
+ * Generates a replacement node for the given import declaration after
+ * removing any plugin specific syntax.
+ * @param importDecalaration The import declaration to transform
+ * @param idGenerator A helper callback to generate a unique identifier(/variable)
+ *                    to use as the import specifier in case none was provided
+ */
+export function transformImport(node: t.ImportDeclaration, idGenerator: (hint: string) => t.Identifier): TransformImportResult {
+    let modSrc = node.source.value;
+
+    // We only support having only a default specifier in the
+    // import declaration. It's okay to have no specifiers.
+    const nSpecifiers = node.specifiers.length;
+    if (nSpecifiers > 1 || (nSpecifiers == 1 && !t.isImportDefaultSpecifier(node.specifiers[0]))) {
+        throw new CSSModuleError(`Invalid CSS module import '${chalk.yellow(modSrc)}': Only default specifiers are allowed`);
+    }
+
+    // Extract module label and real source from the given import source
+    const SourcePattern = /(?<moduleLabel>.+?):(?<moduleSource>.+)/;
+    const matches = modSrc.match(SourcePattern);
+
+    let modLabel: string | undefined;
+    if (matches && matches.groups) {
+        // Update the module source with the real module source
+        modSrc = matches.groups["moduleSource"];
+        modLabel = matches.groups["moduleLabel"];
+    }
+
+    const hasSpecifier = !!nSpecifiers;
+    const newImportSpecId = hasSpecifier ? t.identifier(node.specifiers[0].local.name) : idGenerator(modLabel || "style");
+    const newImportDefSpec = t.importDefaultSpecifier(newImportSpecId);
+    const specifiers = [newImportDefSpec];
+    const newModSrc = t.stringLiteral(modSrc);
+    const newNode = t.importDeclaration(specifiers, newModSrc);
+
+    return {
+        transformedNode: newNode,
+        generatedSpecifier: !hasSpecifier,
+        moduleLabel: modLabel,
+    };
+}
+
+/**
+ * Generates a template literal as a result of transformation applied to the given classNames
+ * @param classNames The string we got from the `className` JSX attribute
+ * @param modules  The CSS modules found in the file
+ */
+export function transformClassNames(classNames: string, modules: Modules): t.TemplateLiteral {
+    let quasis: t.TemplateElement[] = [];
+    let expressions: t.Expression[] = [];
+
+    // Template literals uses alternating quasis and expressions to build
+    // the final template literal. They start and end with a quasis.
+    // So, if quasis = [q1, q2, q3] and expressions = [e1, e2], the
+    // final template literal will be: <q1><e1><q2><e2><q3>
+    let quasisStr = "";
+
+    const addExpression = (mod: string, cn: string) => {
+        // Add the accumulated quasis string.
+        // Always add the cooked value as some transpilers exclusively
+        // use it while ignoring the raw value.
+        let ele = t.templateElement({ raw: quasisStr, cooked: quasisStr });
+        quasis.push(ele);
+
+        // Reset the quasis string -- but with a space so that there's always
+        // a space between two expressions in the final template string.
+        quasisStr = " ";
+
+        // A classname like '.my-class-a' can be accessed from the css module style object in two ways:
+        // - Using dot notation, but remove the dashes from the classname and camelCase it: style.myClassA.
+        // - Using bracket notation: style["my-class-a"].
+        // The latter has the benefit that we don't have to transform the classname, and it can be used directly
+        // in the member expression as the property name. Set `computed` to true to use the bracket notation.
+        const expr = t.memberExpression(t.identifier(mod), t.stringLiteral(cn), true);
+
+        expressions.push(expr);
+    };
+
+    classNames.split(" ").forEach((className) => {
+        if (!className) {
             return;
         }
 
-        let spaceTemplateElement = t.templateElement({ raw: " ", cooked: " " });
-        templateLiteral.expressions.push(expression);
-        templateLiteral.quasis.push(spaceTemplateElement);
-    });
-
-    // removing extra spaces, this way we don't have to figure out the last quasis added was a class or a space
-    templateLiteral.quasis[templateLiteral.quasis.length - 1].value.raw = templateLiteral.quasis[templateLiteral.quasis.length - 1].value.raw.trimEnd();
-    templateLiteral.quasis[templateLiteral.quasis.length - 1].value.cooked = templateLiteral.quasis[templateLiteral.quasis.length - 1].value.cooked?.trimEnd();
-    // last quasis element should have tail as true
-    templateLiteral.quasis[templateLiteral.quasis.length - 1].tail = true;
-
-    return templateLiteral;
-}
-/**
- * creates MemberExpression using module as object and classname as property.
- *
- * eg. `<module-name>[<class-name>]`
- */
-export function createModuleMemberExpression(classname: string, module: string, modules: Modules): t.MemberExpression {
-    let moduleIdentifier: t.Identifier;
-    let classnameStringLiteral = t.stringLiteral(classname);
-
-    if (module == modules.defaultModule) {
-        moduleIdentifier = t.identifier(modules.defaultModule);
-    } else {
-        if (!(module in modules.namedModules)) {
-            throw new CSSModuleError(`Module '${chalk.green(module)}' on class '${chalk.cyan(classname)}' not found`);
+        if (className.startsWith(":") || className.endsWith(":")) {
+            throw new CSSModuleError(`Invalid classname '${className}': Classname can't start or end with ':'`);
         }
 
-        moduleIdentifier = t.identifier(modules.namedModules[module]);
-    }
+        const ClassNamePattern = /(?<moduleLabel>.+?):(?<className>.+)/;
+        const matches = className.match(ClassNamePattern);
 
-    // When a class has dashes in its name, e.g. `.my-class`, it can be
-    // read from the imported style object in two ways:
-    // - Remove dash and camelCase the class name: `style.myClass`.
-    // - Use the bracket syntax for reading object property: `style["my-class"]`.
-    // The latter has the benefit that we can avoid transforming the classname string
-    // and just use it in the generated MemberExpression. Set `computed` to true to use the bracket syntax
-    return t.memberExpression(moduleIdentifier, classnameStringLiteral, true);
-}
+        if (!matches || !matches.groups) {
+            // ClassName uses default module as no module label was provided
 
-/**
- *
- * generates template literal from string classes
- *
- * @param classString string containing classes for the className attribute (eg. "classA classB")
- * @returns templateLiteral based on string classes and modules
- */
-export function getTemplFromStrCls(classString: string, modules: Modules): t.TemplateLiteral {
-    if (!modules.defaultModule) {
-        throw new CSSModuleError("No default css-module found");
-    }
+            if (!modules.defaultModule) {
+                throw new CSSModuleError(`No default module found in the file to use with class '${className}'`);
+            }
 
-    let classList = classString.split(" ");
-    let splittedClass = classList.map((classname) => {
-        return splitClsName(classname, modules.defaultModule ?? "");
-    });
-    let classAsModule = splittedClass.map((classObj) => {
-        if (classObj.module) {
-            return createModuleMemberExpression(classObj.classname, classObj.module, modules);
-        } else {
-            return classObj.classname;
+            addExpression(modules.defaultModule, className);
+            return;
         }
+
+        // Named or global module
+
+        let modLabel = matches.groups["moduleLabel"];
+        let cn = matches.groups["className"];
+
+        if (!modLabel || !cn) {
+            throw new CSSModuleError(`Invalid classname: '${className}'`);
+        }
+
+        // Global classname
+        const GlobalClassNameLabel = "g";
+        if (modLabel === GlobalClassNameLabel) {
+            // Classnames tagged with the global label are left unchanged.
+            // Add them to the quasis string and bail.
+            quasisStr += cn + " ";
+            return;
+        }
+
+        // Named module
+        let module = modules.namedModules[modLabel];
+        if (!module) {
+            throw new CSSModuleError(`Module matching label '${chalk.green(modLabel)}' on '${chalk.cyan(className)}' not found`);
+        }
+        addExpression(module, cn);
     });
-    return createTemplateLiteral(classAsModule);
+
+    // Trim extra spaces at the end of the quasis
+    quasisStr = quasisStr.trimEnd();
+    // Add the last quasis to compelete the alternating sequence.
+    // Also, mark it as the tail element.
+    const elem = t.templateElement({ raw: quasisStr, cooked: quasisStr }, true);
+    quasis.push(elem);
+
+    return t.templateLiteral(quasis, expressions);
 }
-
-/**
- * A helper function to identify Kind of import source.
- * @param statement import statement from the source
- * @returns object representing type of import used and specifier present
- */
-export function getImportInfo(statement: t.ImportDeclaration): DefaultModule | ModuleWithSpecifier | NamedModule {
-    let module = splitModuleSource(statement.source.value);
-
-    // .length is either 0 or 1.
-    if (statement.specifiers.length) {
-        // Syntax: import style from "./m1.module.css"
-        //
-        // all the checks are done inside the visitor for the
-        // presence of only default specifier in case if any specifier is present
-        return {
-            moduleSource: module.moduleSource,
-            default: false,
-            hasSpecifier: true,
-        };
-    } else if (!module.moduleName) {
-        // Syntax: import "./moduleA.module.css"
-        return {
-            moduleSource: module.moduleSource,
-            default: true,
-            hasSpecifier: false,
-        };
-    } else {
-        // Syntax: import "./moduleA.module.css:m1"
-        return {
-            moduleSource: module.moduleSource,
-            moduleName: module.moduleName,
-            default: false,
-            hasSpecifier: false,
-        };
-    }
-}
-
-type DefaultModule = {
-    moduleSource: string;
-    default: true;
-    hasSpecifier: false;
-};
-
-type NamedModule = {
-    moduleSource: string;
-    moduleName: string;
-    default: false;
-    hasSpecifier: false;
-};
-
-type ModuleWithSpecifier = {
-    moduleSource: string;
-    default: false;
-    hasSpecifier: true;
-};

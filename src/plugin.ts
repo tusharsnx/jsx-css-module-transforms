@@ -3,10 +3,10 @@ import { types as t } from "@babel/core";
 import type babel from "@babel/core";
 import chalk from "chalk";
 
-import { getImportInfo, getTemplFromStrCls } from "./transforms.js";
+import { transformClassNames, transformImport } from "./transforms.js";
 import { CSSModuleError } from "./utils.js";
 
-function ImportDeclaration(path: NodePath<t.ImportDeclaration>, state: PluginPass) {
+function ImportDeclaration(path: NodePath<t.ImportDeclaration>, { pluginState }: PluginPass) {
     // we're only interested in scss/sass/css imports
     if (!/.module.(s[ac]ss|css)(:.*)?$/iu.test(path.node.source.value)) {
         return;
@@ -15,65 +15,44 @@ function ImportDeclaration(path: NodePath<t.ImportDeclaration>, state: PluginPas
     // saving path for error messages
     CSSModuleError.path = path;
 
-    if (path.node.specifiers.length > 1 && !t.isImportDefaultSpecifier(path.node.specifiers[0])) {
-        // Syntax: import { classA, classB } from "./m1.module.css"
-        throw new CSSModuleError(`Import CSS-Module as a default import on '${chalk.cyan(path.node.source.value)}'`);
-    }
-    if (path.node.specifiers.length > 1) {
-        // Syntax: import style, { classA, classB } from "./m1.module.css"
-        throw new CSSModuleError(`More than one import found on '${chalk.cyan(path.node.source.value)}'`);
-    }
-
-    let moduleInfo = getImportInfo(path.node);
-    if (moduleInfo.hasSpecifier) {
-        let importSpecifier = path.node.specifiers[0].local;
-        if (importSpecifier.name in state.pluginState.modules.namedModules) {
-            throw new CSSModuleError(`CSS-Module ${chalk.yellow(`'${importSpecifier.name}'`)}  has already been declared`);
-        }
-
-        // saving new module
-        state.pluginState.modules.namedModules[importSpecifier.name] = importSpecifier.name;
-    } else if (moduleInfo.default) {
-        if (state.pluginState.modules.defaultModule) {
-            throw new CSSModuleError(`Only one default css-module import is allowed. Provide names for all except the default module`);
-        }
-
-        let importSpecifier = path.scope.generateUidIdentifier("style");
-        let newSpecifiers = [t.importDefaultSpecifier(importSpecifier)];
-        let newImportDeclaration = t.importDeclaration(newSpecifiers, t.stringLiteral(path.node.source.value));
-        path.replaceWith<t.ImportDeclaration>(newImportDeclaration);
-
-        // saving this module as the default module for the current translation unit.
-        state.pluginState.modules.defaultModule = importSpecifier.name;
-    } else {
-        if (moduleInfo.moduleName in state.pluginState.modules.namedModules) {
-            throw new CSSModuleError(`CSS-Module ${chalk.yellow(`'${moduleInfo.moduleName}'`)} has already been declared`);
-        }
-
-        let importSpecifier = path.scope.generateUidIdentifier(moduleInfo.moduleName);
-        let newSpecifiers = [t.importDefaultSpecifier(importSpecifier)];
-        let newImportDeclaration = t.importDeclaration(newSpecifiers, t.stringLiteral(path.node.source.value));
-        path.replaceWith<t.ImportDeclaration>(newImportDeclaration);
-
-        // saving new module
-        state.pluginState.modules.namedModules[moduleInfo.moduleName] = importSpecifier.name;
-    }
-
-    // strips away module name from the source
-    path.node.source.value = moduleInfo.moduleSource; // this inplace replacment does not causes any problem with the ast
+    // 1. Transform import declaration
+    const idGenerator = (hint: string) => path.scope.generateUidIdentifier(hint);
+    const res = transformImport(path.node, idGenerator);
+    path.replaceWith(res.transformedNode);
     path.skip();
+
+    // 2. Add CSS module to the list
+    const importSpecifier = res.transformedNode.specifiers[0].local.name;
+    if (res.generatedSpecifier) {
+        if (res.moduleLabel) {
+            addCheckedModule(res.moduleLabel, importSpecifier, pluginState.modules);
+        } else {
+            // this is a default module
+            addCheckedDefaultModule(importSpecifier, pluginState.modules);
+        }
+    } else {
+        // Verify that the module label is unique.
+        // Prevents scenarios where the same value is used as both a module
+        // label and an import specifier in different import declarations.
+        addCheckedModule(importSpecifier, importSpecifier, pluginState.modules);
+
+        if (res.moduleLabel && res.moduleLabel != importSpecifier) {
+            // Make module label an alias to the provided specifier
+            addCheckedModule(res.moduleLabel, importSpecifier, pluginState.modules);
+        }
+    }
 }
 
-function JSXAttribute(path: NodePath<t.JSXAttribute>, state: PluginPass) {
-    const firstNamedModule = getFirstNamedModule(state.pluginState.modules.namedModules);
+function JSXAttribute(path: NodePath<t.JSXAttribute>, { pluginState }: PluginPass) {
+    const firstNamedModule = getFirstNamedModule(pluginState.modules.namedModules);
 
     // we only support className attribute having a string value
-    if (path.node.name.name != "className" || !t.isStringLiteral(path.node.value)) {
+    if (path.node.name.name != "className" || !path.node.value || !t.isStringLiteral(path.node.value)) {
         return;
     }
     // className values should be transformed only if we ever found a css module.
     // FirstNamedModule signifies that we found at least one named css module.
-    if (!state.pluginState.modules.defaultModule && !firstNamedModule) {
+    if (!pluginState.modules.defaultModule && !firstNamedModule) {
         return;
     }
 
@@ -81,14 +60,14 @@ function JSXAttribute(path: NodePath<t.JSXAttribute>, state: PluginPass) {
     CSSModuleError.path = path;
 
     // if no default modules is available, make the first modules as default
-    if (!state.pluginState.modules.defaultModule) {
+    if (!pluginState.modules.defaultModule) {
         if (firstNamedModule) {
-            state.pluginState.modules.defaultModule = state.pluginState.modules.namedModules[firstNamedModule];
+            pluginState.modules.defaultModule = pluginState.modules.namedModules[firstNamedModule];
         }
     }
 
-    let fileCSSModules = state.pluginState.modules;
-    let templateLiteral = getTemplFromStrCls(path.node.value.value, fileCSSModules);
+    let classNames = path.node.value.value;
+    let templateLiteral = transformClassNames(classNames, pluginState.modules);
     let jsxExpressionContainer = t.jsxExpressionContainer(templateLiteral);
     let newJSXAttr = t.jsxAttribute(t.jsxIdentifier("className"), jsxExpressionContainer);
     path.replaceWith(newJSXAttr);
@@ -96,9 +75,7 @@ function JSXAttribute(path: NodePath<t.JSXAttribute>, state: PluginPass) {
 }
 
 function API(): PluginObj<PluginPass> {
-    /**
-     *  Sets up the initial state of the plugin
-     */
+    // Set up the initial state for the plugin
     function pre(this: PluginPass): void {
         this.pluginState = {
             modules: {
@@ -116,6 +93,20 @@ function API(): PluginObj<PluginPass> {
     };
 }
 
+function addCheckedModule(moduleLabel: string, module: string, modules: Modules) {
+    if (moduleLabel in modules.namedModules) {
+        throw new CSSModuleError(`Duplicate CSS module '${chalk.yellow(module)}' found`);
+    }
+    modules.namedModules[moduleLabel] = module;
+}
+
+function addCheckedDefaultModule(module: string, modules: Modules) {
+    if (modules.defaultModule) {
+        throw new CSSModuleError(`Only one default css-module import is allowed. Provide names for all except the default module`);
+    }
+    modules.defaultModule = module;
+}
+
 export default API;
 
 function getFirstNamedModule(namedModules: Modules["namedModules"]): string | null {
@@ -123,9 +114,11 @@ function getFirstNamedModule(namedModules: Modules["namedModules"]): string | nu
     return null;
 }
 
+type CSSModuleLabel = string;
+type CSSModuleIdentifier = string;
 export type Modules = {
     defaultModule?: string;
-    namedModules: { [moduleName: string]: string };
+    namedModules: { [moduleLabel: CSSModuleLabel]: CSSModuleIdentifier };
 };
 
 type PluginState = {

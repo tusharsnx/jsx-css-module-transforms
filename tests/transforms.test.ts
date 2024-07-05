@@ -31,21 +31,21 @@ describe("single imports", () => {
     });
 
     test("with specifier (ignore names)", async () => {
-        let source = `import style from "./foo.module.scss:m1"`;
+        let source = `import style from "m1:./foo.module.scss"`;
         let code = await runWithBabel(source);
         expect(code).toMatchInlineSnapshot(`"import style from "./foo.module.scss";"`);
 
-        source = `import style from "./foo.module.css:m1"`;
+        source = `import style from "m1:./foo.module.css"`;
         code = await runWithBabel(source);
         expect(code).toMatchInlineSnapshot(`"import style from "./foo.module.css";"`);
     });
 
     test("with named-module", async () => {
-        let source = `import "./foo.module.scss:m1"`;
+        let source = `import "m1:./foo.module.scss"`;
         let code = await runWithBabel(source);
         expect(code).toMatchInlineSnapshot(`"import _m from "./foo.module.scss";"`);
 
-        source = `import "./foo.module.css:m1"`;
+        source = `import "m1:./foo.module.css"`;
         code = await runWithBabel(source);
         expect(code).toMatchInlineSnapshot(`"import _m from "./foo.module.css";"`);
     });
@@ -62,7 +62,7 @@ describe("single imports", () => {
 });
 
 describe("imports multiple module", () => {
-    test("default module", async () => {
+    test("multiple default module", async () => {
         let source = `
             import "./foo.module.css"
             import "./bar.module.css"
@@ -72,8 +72,8 @@ describe("imports multiple module", () => {
 
     test("with named-modules", async () => {
         let source = `
-            import "./module1.module.css:m1"
-            import "./module2.module.css:m2"
+            import "m1:./module1.module.css"
+            import "m2:./module2.module.css"
         `;
         let code = await runWithBabel(source);
         expect(code).toMatchInlineSnapshot(`
@@ -84,16 +84,16 @@ import _m2 from "./module2.module.css";"
 
     test("with same named-modules twice", async () => {
         let source = `
-            import "./module1.module.css:m1"
-            import "./module2.module.css:m1"
+            import "m1:./module1.module.css"
+            import "m1:./module2.module.css"
         `;
         await expect(runWithBabel(source)).rejects.toThrow(CSSModuleError);
     });
 
     test("with specifier", async () => {
         let source = `
-            import style from "./module1.module.css:m1"
-            import style1 from "./module2.module.css:m2"
+            import style from "m1:./module1.module.css"
+            import style1 from "m2:./module2.module.css"
         `;
         let code = await runWithBabel(source);
         expect(code).toMatchInlineSnapshot(`
@@ -104,8 +104,8 @@ import style1 from "./module2.module.css";"
 
     test("with same specifier twice", async () => {
         let source = `
-            import style from "./module1.module.css:m1"
-            import style from "./module2.module.css:m2"
+            import style from "m1:./module1.module.css"
+            import style from "m2:./module2.module.css"
         `;
         expect(runWithBabel(source)).rejects.toThrow(SyntaxError);
     });
@@ -115,7 +115,7 @@ describe("different kinds together", () => {
     test("each kind once", async () => {
         let source = `
             import style from "./module1.module.css"
-            import "./module2.module.css:m2"
+            import "m2:./module2.module.css"
             import "./module3.module.css"
         `;
         let code = await runWithBabel(source);
@@ -130,7 +130,7 @@ import _style from "./module3.module.css";"
         let source = `
             import "./component.module.css"
             import layout from "./layout.module.css"
-            import "./layout2.module.css:layout"
+            import "layout:./layout2.module.css"
         `;
         await expect(runWithBabel(source)).rejects.toThrow(CSSModuleError);
     });
@@ -138,7 +138,7 @@ import _style from "./module3.module.css";"
     test("same module name used twice on different kinds (2)", async () => {
         let source = `
             import "./component.module.css"
-            import "./layout2.module.css:layout"
+            import "layout:./layout2.module.css"
             import layout from "./layout.module.css"
         `;
         await expect(runWithBabel(source)).rejects.toThrow(CSSModuleError);
@@ -182,10 +182,10 @@ function Component() {
 
     test("with named-module", async () => {
         let source = `
-            import "./component.module.css:m1"
+            import "m1:./component.module.css"
 
             function Component() {
-                return <h1 className="foo-bar:m1 baz:m1"></h1>
+                return <h1 className="m1:foo-bar m1:baz"></h1>
             }
         `;
         let code = await runWithBabel(source);
@@ -197,7 +197,17 @@ function Component() {
 `);
     });
 
-    test("named module class with colon only", async () => {
+    test("named module class with colon only at the front", async () => {
+        let source = `
+            import "./component.module.css"
+            function Component() {
+                return <h1 className=":foo-bar"></h1>
+            }
+        `;
+        await expect(() => runWithBabel(source)).rejects.toThrow(CSSModuleError);
+    });
+
+    test("named module class with colon only at the end", async () => {
         let source = `
             import "./component.module.css"
 
@@ -235,7 +245,7 @@ function component() {
             import layout from "./layout.module.css"
 
             function Component() {
-                return <h1 className="foo-bar:layout baz:style"></h1>
+                return <h1 className="layout:foo-bar style:baz"></h1>
             }
         `;
         let code = await runWithBabel(source);
@@ -250,11 +260,11 @@ function Component() {
 
     test("named-module", async () => {
         let source = `
-            import "./component.module.css:style"
-            import "./layout.module.css:layout"
+            import "style:./component.module.css"
+            import "layout:./layout.module.css"
 
             function Component() {
-                return <h1 className="foo-bar:layout baz:style"></h1>
+                return <h1 className="layout:foo-bar style:baz"></h1>
             }
         `;
         let code = await runWithBabel(source);
@@ -273,7 +283,7 @@ function Component() {
             import layout from "./layout.module.css"
 
             function Component() {
-                return <h1 className="foo-bar:layout baz:style2"></h1>
+                return <h1 className="layout:foo-bar style2:baz"></h1>
             }
         `;
         await expect(runWithBabel(source)).rejects.toThrow(CSSModuleError);
@@ -281,11 +291,11 @@ function Component() {
 
     test("named-module (class uses non-existent module)", async () => {
         let source = `
-            import "./component.module.css:style"
-            import "./layout.module.css:layout"
+            import "style:./component.module.css"
+            import "layout:./layout.module.css"
 
             function component() {
-                return <h1 className="foo-bar:layout baz:style2"></h1>
+                return <h1 className="layout:foo-bar style2:baz"></h1>
             }
         `;
         await expect(runWithBabel(source)).rejects.toThrow(CSSModuleError);
@@ -297,12 +307,12 @@ describe("jsx with multiple kinds of module", () => {
         let source = `
             import style from "./component.module.css"
             import layout from "./layout.module.css"
-            import "./layout2.module.css:altLayout"
+            import "altLayout:./layout2.module.css"
 
             function Component() {
                 return (
-                    <div className="grid-1:layout col-3:altLayout">
-                        <h1 className="clr-green:style"></h1>
+                    <div className="layout:grid-1 altLayout:col-3">
+                        <h1 className="style:clr-green"></h1>
                     </div>
                 )
             }
@@ -324,12 +334,12 @@ function Component() {
         let source = `
             import style from "./component.module.css"
             import layout from "./layout.module.css"
-            import "./layout2.module.css:altLayout"
+            import "altLayout:./layout2.module.css"
 
             function Component() {
                 return (
-                    <div className="grid-1:layout col-3:altLayout">
-                        <h1 className="bg-primary:g clr-green:style"></h1>
+                    <div className="layout:grid-1 altLayout:col-3">
+                        <h1 className="g:bg-primary style:clr-green"></h1>
                     </div>
                 )
             }

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import "./page.module.css";
+import style from "style1:./page.module.css";
 
 export default function Home() {
     return (
@@ -21,14 +21,14 @@ export default function Home() {
             </div>
 
             <div className="grid">
-                <a href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app" className="card" target="_blank" rel="noopener noreferrer">
+                <a href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app" className={style.card} target="_blank" rel="noopener noreferrer">
                     <h2>
                         Docs <span>-&gt;</span>
                     </h2>
                     <p>Find in-depth information about Next.js features and API.</p>
                 </a>
 
-                <a href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app" className="card" target="_blank" rel="noopener noreferrer">
+                <a href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app" className="style1:card" target="_blank" rel="noopener noreferrer">
                     <h2>
                         Learn <span>-&gt;</span>
                     </h2>
@@ -42,7 +42,7 @@ export default function Home() {
                     <p>Explore starter templates for Next.js.</p>
                 </a>
 
-                <a href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app" className="card" target="_blank" rel="noopener noreferrer">
+                <a href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app" className="g:glow card" target="_blank" rel="noopener noreferrer">
                     <h2>
                         Deploy <span>-&gt;</span>
                     </h2>
