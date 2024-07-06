@@ -7,13 +7,13 @@ import { transformClassNames, transformImport } from "./transforms.js";
 import { CSSModuleError } from "./utils.js";
 
 function ImportDeclaration(path: NodePath<t.ImportDeclaration>, { pluginState }: PluginPass) {
+    // saving node for error messages
+    CSSModuleError.node = path.node;
+
     // we're only interested in scss/sass/css imports
     if (!/.module.(s[ac]ss|css)(:.*)?$/iu.test(path.node.source.value)) {
         return;
     }
-
-    // saving path for error messages
-    CSSModuleError.path = path;
 
     // 1. Transform import declaration
     const idGenerator = (hint: string) => path.scope.generateUidIdentifier(hint);
@@ -44,6 +44,9 @@ function ImportDeclaration(path: NodePath<t.ImportDeclaration>, { pluginState }:
 }
 
 function JSXAttribute(path: NodePath<t.JSXAttribute>, { pluginState }: PluginPass) {
+    // saving node for error messages
+    CSSModuleError.node = path.node;
+
     const firstNamedModule = getFirstNamedModule(pluginState.modules.namedModules);
 
     // we only support className attribute having a string value
@@ -55,9 +58,6 @@ function JSXAttribute(path: NodePath<t.JSXAttribute>, { pluginState }: PluginPas
     if (!pluginState.modules.defaultModule && !firstNamedModule) {
         return;
     }
-
-    // saving path for error messages
-    CSSModuleError.path = path;
 
     // if no default modules is available, make the first modules as default
     if (!pluginState.modules.defaultModule) {
