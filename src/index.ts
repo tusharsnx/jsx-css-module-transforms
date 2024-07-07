@@ -19,6 +19,8 @@ function unpluginFactory(userOpts: PluginOptions): UnpluginOptions {
         },
 
         transform(code, id) {
+            CSSModuleError.filename = id;
+
             let plugins: PluginItem[] = ["@babel/plugin-syntax-jsx", Plugin];
 
             const isTSX = /\.tsx$/i.test(id);
@@ -33,7 +35,7 @@ function unpluginFactory(userOpts: PluginOptions): UnpluginOptions {
             });
 
             if (!result || !result.code) {
-                throw new CSSModuleError(`Could not transform ${id}`);
+                throw new CSSModuleError("Failed to transform " + id);
             }
 
             return { code: result.code, map: result.map };
